@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@drawable/home_variant_outline"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/activityFragment"
+        android:icon="@drawable/developer_board"
+        android:title="Activity" />
+
+    <item
+        android:id="@+id/messageFragment"
+        android:icon="@drawable/message_processing_outline"
+        android:title="Message" />
+    <item
+        android:id="@+id/notificationFragment"
+        android:icon="@drawable/bell_outline"
+        android:title="Notification" />
+    <item
+        android:id="@+id/accountFragment"
+        android:icon="@drawable/account_circle_outline"
+        android:title="Account" />
+
+</menu>
