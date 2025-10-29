@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:background="#FFFFFF"
+    android:paddingHorizontal="12dp"
+    android:gravity="center_vertical"
+    android:elevation="6dp">
+
+    <!-- Back -->
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_back"
+        android:layout_centerVertical="true"
+        />
+
+    <!-- Icon vị trí -->
+    <ImageView
+        android:id="@+id/icLocation"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_location_red"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="12dp"
+        android:layout_toEndOf="@id/btnBack"/>
+
+    <!-- Địa chỉ hiển thị -->
+    <LinearLayout
+        android:id="@+id/layoutAddress"
+        android:orientation="vertical"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/icLocation"
+        android:layout_toStartOf="@id/btnInfo"
+        android:layout_weight="1">
+
+        <!-- Địa chỉ rút gọn -->
+        <TextView
+            android:id="@+id/txtShortAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bùi Quang Là phường 12"
+            android:textColor="#000"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+
+        <!-- Địa chỉ đầy đủ -->
+        <TextView
+            android:id="@+id/txtFullAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="54/59 Bùi Quang Là, phường 12, Gò Vấp"
+            android:textColor="#555"
+            android:textSize="13sp"/>
+
+    </LinearLayout>
+
+    <!-- Icon info -->
+    <ImageView
+        android:id="@+id/btnInfo"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_info"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"/>
+
+</RelativeLayout>
