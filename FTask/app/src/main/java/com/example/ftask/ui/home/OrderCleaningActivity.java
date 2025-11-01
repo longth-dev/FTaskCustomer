@@ -1,12 +1,17 @@
 package com.example.ftask.ui.home;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager2.widget.ViewPager2;
+
 import com.example.ftask.R;
+import com.google.android.material.tabs.TabLayout;
 
 public class OrderCleaningActivity extends AppCompatActivity {
 
@@ -36,6 +41,37 @@ public class OrderCleaningActivity extends AppCompatActivity {
         setupOptionsSelection();
 
         updatePrice();
+
+        LinearLayout headerJobDetails = findViewById(R.id.headerJobDetails);
+        LinearLayout jobDetailContent = findViewById(R.id.jobDetailContent);
+        ImageView iconExpand = findViewById(R.id.iconExpand);
+
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
+        ViewPager2 viewPager = findViewById(R.id.viewPager);
+
+        JobDetailPagerAdapter adapter = new JobDetailPagerAdapter(this);
+        viewPager.setAdapter(adapter);
+
+        new com.google.android.material.tabs.TabLayoutMediator(tabLayout, viewPager,
+                (tab, position) -> {
+                    switch (position) {
+                        case 0: tab.setText("Phòng ngủ"); break;
+                        case 1: tab.setText("Phòng tắm"); break;
+                        case 2: tab.setText("Nhà bếp"); break;
+                        case 3: tab.setText("Phòng khách và khu vực chung"); break;
+                    }
+                }).attach();
+
+        headerJobDetails.setOnClickListener(v -> {
+            if (jobDetailContent.getVisibility() == View.GONE) {
+                jobDetailContent.setVisibility(View.VISIBLE);
+                iconExpand.setRotation(90);
+            } else {
+                jobDetailContent.setVisibility(View.GONE);
+                iconExpand.setRotation(0);
+            }
+        });
+
     }
 
     private void mapViews() {
@@ -60,7 +96,31 @@ public class OrderCleaningActivity extends AppCompatActivity {
 
         txtShortAddress.setText("Bùi Quang Là phường 12");
         txtFullAddress.setText("54/59 Bùi Quang Là, phường 12, Gò Vấp");
+
+
+
+        TextView btnNext = findViewById(R.id.btnNext);
+        btnNext.setOnClickListener(v -> {
+            int total = calculateTotal();
+            Intent intent = new Intent(OrderCleaningActivity.this, ScheduleActivity.class);
+            intent.putExtra("TOTAL_PRICE", total);
+            startActivity(intent);
+        });
     }
+
+    private int calculateTotal() {
+        int total = 0;
+
+        if (selectedHours == 2) total = price2h;
+        if (selectedHours == 3) total = price3h;
+        if (selectedHours == 4) total = price4h;
+
+        if (switchPremium.isChecked()) total += premiumPrice;
+        if (extraHours > 0) total += extraHours * extraHourPrice;
+
+        return total;
+    }
+
 
     private void setupBackButton() {
         ImageView btnBack = findViewById(R.id.btnBack);
@@ -122,8 +182,9 @@ public class OrderCleaningActivity extends AppCompatActivity {
     }
 
     private void updatePrice() {
-        int total = 0;
+        int total = calculateTotal();
 
+        txtTotalPrice.setText(total + "đ");
         if (selectedHours == 2) total = price2h;
         if (selectedHours == 3) total = price3h;
         if (selectedHours == 4) total = price4h;

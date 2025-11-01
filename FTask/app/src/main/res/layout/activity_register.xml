@@ -1,0 +1,111 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- 🖼️ Logo -->
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:layout_marginBottom="32dp"
+            android:src="@drawable/logu"
+            android:padding="12dp"
+            android:scaleType="centerInside" />
+
+        <!-- 🧑 Họ tên -->
+        <EditText
+            android:id="@+id/edtFullName"
+            android:hint="Họ và tên"
+            android:background="@drawable/bg_input_field"
+            android:padding="14dp"
+            android:layout_marginBottom="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- 🪪 CCCD/CMND -->
+        <EditText
+            android:id="@+id/edtIdCard"
+            android:hint="Số CCCD/CMND"
+            android:inputType="number"
+            android:background="@drawable/bg_input_field"
+            android:padding="14dp"
+            android:layout_marginBottom="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- 📱 Số điện thoại -->
+        <EditText
+            android:id="@+id/edtPhone"
+            android:hint="Số điện thoại"
+            android:inputType="phone"
+            android:background="@drawable/bg_input_field"
+            android:padding="14dp"
+            android:layout_marginBottom="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- ✉️ Email -->
+        <EditText
+            android:id="@+id/edtEmail"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:background="@drawable/bg_input_field"
+            android:padding="14dp"
+            android:layout_marginBottom="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- 🎁 Mã giới thiệu (nếu có) -->
+        <EditText
+            android:id="@+id/edtReferral"
+            android:hint="Mã giới thiệu (nếu có)"
+            android:background="@drawable/bg_input_field"
+            android:padding="14dp"
+            android:layout_marginBottom="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- 🔒 Mật khẩu -->
+        <EditText
+            android:id="@+id/edtPassword"
+            android:hint="Mật khẩu"
+            android:inputType="textPassword"
+            android:background="@drawable/bg_input_field"
+            android:padding="14dp"
+            android:layout_marginBottom="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- 🔘 Nút đăng ký -->
+        <Button
+            android:id="@+id/btnRegister"
+            android:text="Đăng ký"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:backgroundTint="#2196F3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:fontFamily="sans-serif-medium" />
+
+        <!-- 🔗 Quay lại đăng nhập -->
+        <TextView
+            android:id="@+id/tvLoginLink"
+            android:text="Đã có tài khoản? Đăng nhập"
+            android:textColor="#2196F3"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</ScrollView>

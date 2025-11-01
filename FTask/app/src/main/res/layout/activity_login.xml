@@ -1,0 +1,71 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- 🖼️ Logo -->
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="350dp"
+            android:layout_height="350dp"
+            android:layout_marginBottom="40dp"
+            android:src="@drawable/logu"
+            android:padding="16dp"
+            android:scaleType="centerInside"
+            android:contentDescription="@string/app_name" />
+
+        <!-- 📱 Ô nhập số điện thoại -->
+        <EditText
+            android:id="@+id/edtPhone"
+            android:hint="Số điện thoại"
+            android:inputType="phone"
+            android:background="@drawable/bg_input_field"
+            android:padding="14dp"
+            android:layout_marginBottom="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- 🔒 Ô nhập mật khẩu -->
+        <EditText
+            android:id="@+id/edtPassword"
+            android:hint="Mật khẩu"
+            android:inputType="textPassword"
+            android:background="@drawable/bg_input_field"
+            android:padding="14dp"
+            android:layout_marginBottom="24dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- 🔘 Nút đăng nhập -->
+        <Button
+            android:id="@+id/btnLogin"
+            android:text="Đăng nhập"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:backgroundTint="#2196F3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:padding="12dp"
+            android:fontFamily="sans-serif-medium" />
+
+        <!-- 🔗 Link đăng ký -->
+        <TextView
+            android:id="@+id/tvRegisterLink"
+            android:text="Chưa có tài khoản? Đăng ký ngay"
+            android:textColor="#2196F3"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</ScrollView>
