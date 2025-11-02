@@ -1,24 +1,25 @@
 package com.example.ftask.ui.home;
 
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.example.ftask.R;
 import java.util.List;
 
 public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ServiceViewHolder> {
 
-    private List<ServiceModel> list;
+    private List<ServiceModel> services;
+    private OnServiceClickListener listener;
 
-    public ServiceAdapter(List<ServiceModel> list) {
-        this.list = list;
+    // 🔹 Constructor thêm listener
+    public ServiceAdapter(List<ServiceModel> services, OnServiceClickListener listener) {
+        this.services = services;
+        this.listener = listener;
     }
 
     @NonNull
@@ -31,44 +32,41 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ServiceV
 
     @Override
     public void onBindViewHolder(@NonNull ServiceViewHolder holder, int position) {
-        ServiceModel model = list.get(position);
+        ServiceModel service = services.get(position);
+        holder.txtName.setText(service.getName());
+        Glide.with(holder.itemView.getContext())
+                .load(service.getImageUrl())
+                .placeholder(R.drawable.cleaning)
+                .into(holder.imgService);
 
-        holder.tvName.setText(model.getName());
-        holder.imgService.setImageResource(model.getImage());
-
-        // Click Item
+        // 🔹 Click item
         holder.itemView.setOnClickListener(v -> {
-
-            // Animation scale nhỏ rồi to lên nhẹ
-            Animation scaleAnim = new ScaleAnimation(
-                    0.95f, 1.0f,
-                    0.95f, 1.0f,
-                    Animation.RELATIVE_TO_SELF, 0.5f,
-                    Animation.RELATIVE_TO_SELF, 0.5f
-            );
-            scaleAnim.setDuration(150);
-            v.startAnimation(scaleAnim);
-
-            // Mở trang đặt dịch vụ
-            Intent intent = new Intent(v.getContext(), OrderCleaningActivity.class);
-            intent.putExtra("serviceName", model.getName());
-            v.getContext().startActivity(intent);
+            if (listener != null) listener.onServiceClick(service);
         });
     }
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return services.size();
     }
 
-    static class ServiceViewHolder extends RecyclerView.ViewHolder {
+    public static class ServiceViewHolder extends RecyclerView.ViewHolder {
         ImageView imgService;
-        TextView tvName;
+        TextView txtName, txtDescription;
 
         public ServiceViewHolder(@NonNull View itemView) {
             super(itemView);
             imgService = itemView.findViewById(R.id.imgService);
-            tvName = itemView.findViewById(R.id.tvServiceName);
-        }
+            txtName = itemView.findViewById(R.id.txtName);
+                }
+    }
+
+    public interface OnServiceClickListener {
+        void onServiceClick(ServiceModel service);
+    }
+
+    public void updateData(List<ServiceModel> newList) {
+        this.services = newList;
+        notifyDataSetChanged();
     }
 }

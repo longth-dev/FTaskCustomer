@@ -1,0 +1,41 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:gravity="center_horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <ImageView
+        android:id="@+id/imgLogo"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
+        android:layout_marginBottom="40dp"
+        android:src="@drawable/logu"
+        android:padding="16dp"
+        android:scaleType="centerInside"
+        android:contentDescription="@string/app_name" />
+
+
+
+    <EditText
+        android:id="@+id/edtOtp"
+        android:hint="Nhập mã OTP"
+        android:inputType="number"
+        android:background="@drawable/bg_input_field"
+        android:padding="14dp"
+        android:layout_marginBottom="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnVerify"
+        android:text="Xác nhận"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:backgroundTint="#2196F3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp" />
+</LinearLayout>

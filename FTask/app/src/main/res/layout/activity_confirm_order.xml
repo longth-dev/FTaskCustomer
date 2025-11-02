@@ -106,21 +106,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="⌛ Lặp lại hàng tuần:"
-                android:textStyle="bold"
-                android:textColor="#333" />
-
-            <TextView
-                android:id="@+id/txtRepeat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Không"
-                android:textColor="#777"
-                android:layout_marginBottom="6dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="📝 Ghi chú:"
                 android:textStyle="bold"
                 android:textColor="#333" />

@@ -16,11 +16,15 @@
         <activity android:name=".ui.home.ScheduleActivity" />
         <activity android:name=".ui.home.ConfirmOrderActivity" />
         <activity android:name=".ui.auth.RegisterActivity" />
+        <activity android:name=".ui.auth.VerifyActivity" />
 
 
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="true">
+<!--        <activity-->
+<!--            android:name=".MainActivity"-->
+<!--            android:exported="true">-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

@@ -104,36 +104,6 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- Lặp lại hàng tuần -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="16dp">
-
-                <ImageView
-                    android:layout_width="22dp"
-                    android:layout_height="22dp"
-                    android:src="@drawable/calendar"
-                    android:layout_marginEnd="10dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Lặp lại hàng tuần"
-                    android:textColor="#333"
-                    android:textSize="15sp"
-                    android:layout_weight="1" />
-
-                <Switch
-                    android:id="@+id/switchRepeat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:thumbTint="@color/switch_thumb_selector"
-                    android:trackTint="@color/switch_track_selector" />
-            </LinearLayout>
-
             <!-- Ghi chú -->
             <TextView
                 android:layout_width="wrap_content"

@@ -39,7 +39,6 @@ public class ScheduleActivity extends AppCompatActivity {
         txtMinute = findViewById(R.id.txtMinute);
         txtPrice = findViewById(R.id.txtPrice);
         edtNote = findViewById(R.id.edtNote);
-        switchRepeat = findViewById(R.id.switchRepeat);
 
         totalPrice = getIntent().getIntExtra("TOTAL_PRICE", 0);
         if (totalPrice > 0) {
@@ -149,29 +148,24 @@ public class ScheduleActivity extends AppCompatActivity {
         txtMinute.setText(String.format(Locale.getDefault(), "%02d", selectedMinute));
     }
 
+
     private void goToConfirmScreen() {
         Intent intent = new Intent(this, ConfirmOrderActivity.class);
         intent.putExtra("TOTAL_PRICE", totalPrice);
+        intent.putExtra("VARIANT_ID", getIntent().getIntExtra("VARIANT_ID", 0)); // gửi variantId
         intent.putExtra("SELECTED_HOUR", selectedHour);
         intent.putExtra("SELECTED_MINUTE", selectedMinute);
 
-        // Lấy ngày được chọn
         if (selectedDayView != null && selectedDayView instanceof LinearLayout) {
             LinearLayout layout = (LinearLayout) selectedDayView;
             TextView dayOfWeek = (TextView) layout.getChildAt(0);
             TextView dayOfMonth = (TextView) layout.getChildAt(1);
-
             String fullDate = dayOfWeek.getText().toString() + ", " + dayOfMonth.getText().toString();
             intent.putExtra("SELECTED_DATE", fullDate);
         }
 
-
-        // Lặp lại hàng tuần
-        intent.putExtra("IS_REPEAT", switchRepeat.isChecked());
-
-        // Ghi chú
         intent.putExtra("NOTE", edtNote.getText().toString().trim());
-
         startActivity(intent);
     }
+
 }

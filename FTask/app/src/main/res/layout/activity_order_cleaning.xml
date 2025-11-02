@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F8F8"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    >
+    android:background="#F8F8F8">
 
+    <!-- 🔹 Header địa chỉ -->
     <include
         android:id="@+id/addressHeader"
         layout="@layout/layout_address_header"
@@ -13,14 +13,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true" />
 
+    <!-- 🔹 Nội dung cuộn -->
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/addressHeader"
         android:layout_above="@id/bottomBar"
         android:fillViewport="true">
-
-
 
         <LinearLayout
             android:orientation="vertical"
@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:padding="16dp">
 
-            <!-- Title -->
+            <!-- Tiêu đề -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
                 android:textColor="#333333"
                 android:textStyle="bold"
                 android:textSize="18sp"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="8dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -44,293 +44,29 @@
                 android:text="Vui lòng ước tính diện tích cần dọn dẹp và chọn phương án phù hợp."
                 android:textColor="#777"
                 android:textSize="14sp"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginBottom="12dp" />
 
+            <!-- 🔹 Container để thêm gói dịch vụ động -->
             <LinearLayout
-                android:id="@+id/item2h"
+                android:id="@+id/layoutVariantContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_option_unselected"
                 android:orientation="vertical"
-                android:padding="14dp"
-                android:layout_marginBottom="10dp">
+                android:divider="?android:attr/dividerHorizontal"
+                android:showDividers="middle"
+                android:layout_marginBottom="16dp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="2 giờ"
-                    android:textStyle="bold"
-                    android:textColor="#333"
-                    android:textSize="16sp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Tối đa 55m² hoặc 2 phòng"
-                    android:textColor="#888"
-                    android:textSize="13sp"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/item3h"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_option_unselected"
-                android:orientation="vertical"
-                android:padding="14dp"
-                android:layout_marginBottom="10dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="3 giờ"
-                    android:textStyle="bold"
-                    android:textColor="#333"
-                    android:textSize="16sp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Tối đa 85m² hoặc 3 phòng"
-                    android:textColor="#888"
-                    android:textSize="13sp"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/item4h"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_option_unselected"
-                android:orientation="vertical"
-                android:padding="14dp"
-                android:layout_marginBottom="10dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="4 giờ"
-                    android:textStyle="bold"
-                    android:textColor="#333"
-                    android:textSize="16sp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Tối đa 105m² hoặc 4 phòng"
-                    android:textColor="#888"
-                    android:textSize="13sp"/>
-            </LinearLayout>
-
-            <!-- Premium -->
-            <LinearLayout
-                android:id="@+id/layoutPremium"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="14dp"
-                android:background="@drawable/bg_option_unselected"
-                android:gravity="center_vertical"
-                android:layout_marginTop="12dp"
-                android:layout_marginBottom="16dp">
-
-                <ImageView
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:src="@drawable/ic_premium"
-                    android:layout_marginEnd="10dp" />
-
-                <TextView
-                    android:id="@+id/txtPremium"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="Dịch vụ Premium"
-                    android:textColor="#333"
-                    android:textStyle="bold"
-                    android:textSize="15sp"
-                    android:layout_weight="1"/>
-
-                <Switch
-                    android:id="@+id/switchPremium"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:thumbTint="@color/switch_thumb_selector"
-                    android:trackTint="@color/switch_track_selector"/>
-            </LinearLayout>
-
-            <!-- Dịch vụ thêm -->
+            <!-- 🔹 Tiêu đề dịch vụ thêm -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Dịch vụ thêm"
-                android:textColor="#333"
+                android:textColor="#333333"
                 android:textStyle="bold"
                 android:textSize="18sp"
-                android:layout_marginBottom="6dp"/>
+                android:layout_marginBottom="6dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Bạn có thể chọn thêm dịch vụ."
-                android:textColor="#777"
-                android:textSize="14sp"
-                android:layout_marginBottom="12dp"/>
-
-            <!-- Hai dịch vụ ngang hàng -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:id="@+id/itemCooking"
-                    android:layout_width="0dp"
-                    android:layout_height="120dp"
-                    android:orientation="vertical"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:background="@drawable/bg_option_unselected"
-                    android:padding="12dp"
-                    android:layout_marginEnd="10dp">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_cooking"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Nấu ăn"
-                        android:textStyle="bold"
-                        android:textColor="#333"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="+1h"
-                        android:textColor="#888"
-                        android:textSize="12sp"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/itemIroning"
-                    android:layout_width="0dp"
-                    android:layout_height="120dp"
-                    android:orientation="vertical"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:background="@drawable/bg_option_unselected"
-                    android:padding="12dp">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/ic_iron"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ủi đồ"
-                        android:textStyle="bold"
-                        android:textColor="#333"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="+1h"
-                        android:textColor="#888"
-                        android:textSize="12sp"/>
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- Tùy chọn -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tùy chọn"
-                android:textColor="#333"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:layout_marginBottom="6dp"/>
-
-            <LinearLayout
-                android:id="@+id/optPet"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="14dp"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/bg_option_unselected">
-
-                <Switch
-                    android:id="@+id/switchPet"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:thumbTint="@color/switch_thumb_selector"
-                    android:trackTint="@color/switch_track_selector"
-                    android:layout_marginEnd="10dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Nhà có vật nuôi"
-                    android:textSize="15sp"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/optChooseTasker"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="14dp"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/bg_option_unselected">
-
-                <Switch
-                    android:id="@+id/switchChooseTasker"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:thumbTint="@color/switch_thumb_selector"
-                    android:trackTint="@color/switch_track_selector"
-                    android:layout_marginEnd="10dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Bạn tự chọn Tasker"
-                    android:textSize="15sp"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/optFavorite"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="14dp"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="20dp"
-                android:background="@drawable/bg_option_unselected">
-
-                <Switch
-                    android:id="@+id/switchFavorite"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:thumbTint="@color/switch_thumb_selector"
-                    android:trackTint="@color/switch_track_selector"
-                    android:layout_marginEnd="10dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Ưu tiên Tasker yêu thích"
-                    android:textSize="15sp"/>
-            </LinearLayout>
-
-            <!-- Chi tiết công việc -->
+            <!-- 🔹 Chi tiết công việc -->
             <LinearLayout
                 android:id="@+id/layoutJobDetails"
                 android:layout_width="match_parent"
@@ -340,7 +76,7 @@
                 android:padding="14dp"
                 android:layout_marginBottom="20dp">
 
-                <!-- Header bấm mở -->
+                <!-- Header mở rộng -->
                 <LinearLayout
                     android:id="@+id/headerJobDetails"
                     android:layout_width="match_parent"
@@ -364,7 +100,7 @@
                         android:src="@drawable/rightarrow" />
                 </LinearLayout>
 
-                <!-- Nội dung tab, mặc định ẩn -->
+                <!-- Nội dung tab (ẩn mặc định) -->
                 <LinearLayout
                     android:id="@+id/jobDetailContent"
                     android:layout_width="match_parent"
@@ -373,7 +109,6 @@
                     android:visibility="gone"
                     android:layout_marginTop="8dp">
 
-                    <!-- TabLayout -->
                     <com.google.android.material.tabs.TabLayout
                         android:id="@+id/tabLayout"
                         android:layout_width="match_parent"
@@ -385,8 +120,6 @@
                         app:tabMode="scrollable"
                         app:tabGravity="fill" />
 
-
-                    <!-- ViewPager2 -->
                     <androidx.viewpager2.widget.ViewPager2
                         android:id="@+id/viewPager"
                         android:layout_width="match_parent"
@@ -394,14 +127,10 @@
                         android:layout_marginTop="10dp" />
                 </LinearLayout>
             </LinearLayout>
-
-
-
-
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Bar -->
+    <!-- 🔹 Thanh dưới cùng -->
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
@@ -421,7 +150,7 @@
             android:text="0đ"
             android:textColor="#4CAF50"
             android:textSize="18sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/btnNext"
@@ -433,7 +162,7 @@
             android:text="Tiếp theo"
             android:textColor="#FFF"
             android:textStyle="bold"
-            android:layout_marginLeft="10dp"/>
+            android:layout_marginStart="10dp" />
     </LinearLayout>
 
 </RelativeLayout>
