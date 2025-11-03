@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="16dp"
+    android:height="16dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- First Check -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M0.41,13.41L6,19l1.41,-1.42L1.83,12z" />
+
+    <!-- Second Check -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M6,19l1.41,1.41L23,4.83 21.59,3.41 6,19z" />
+
+    <!-- Third Check (overlapping) -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M17.59,3.41L16.18,4.83 21.77,10.42 23.18,9z" />
+</vector>

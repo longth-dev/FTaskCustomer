@@ -13,6 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FTask">
+        <activity
+            android:name=".ui.message.ChatDetailActivity"
+            android:exported="false" />
         <activity android:name=".ui.home.GeneralOrderActivity" />
         <activity android:name=".ui.home.OrderCleaningActivity" />
         <activity android:name=".ui.home.ScheduleActivity" />
@@ -22,9 +25,10 @@
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="true">
-<!--        <activity-->
-<!--            android:name=".MainActivity"-->
-<!--            android:exported="true">-->
+
+            <!-- <activity -->
+            <!-- android:name=".MainActivity" -->
+            <!-- android:exported="true"> -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
