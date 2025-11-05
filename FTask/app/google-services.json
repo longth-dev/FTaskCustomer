@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "160941359103",
+    "project_id": "ftaskfirebase",
+    "storage_bucket": "ftaskfirebase.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:160941359103:android:24657b506b9fd7f28b71ca",
+        "android_client_info": {
+          "package_name": "com.example.ftask"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrxdsHEqeaMTnT2R4w6vWJsEv-9wck4aQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

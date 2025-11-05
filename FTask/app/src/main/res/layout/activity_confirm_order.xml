@@ -39,20 +39,23 @@
             android:layout_marginBottom="20dp">
 
             <TextView
+                android:id="@+id/txtShortAddress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bùi Quang Là phường 12"
+                android:text="Đang tải địa chỉ..."
                 android:textStyle="bold"
                 android:textSize="15sp"
                 android:textColor="#333" />
 
             <TextView
+                android:id="@+id/txtFullAddress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="54/59 Bùi Quang Là, phường 12, Gò Vấp, Hồ Chí Minh"
+                android:text="(Chưa chọn vị trí)"
                 android:textSize="14sp"
                 android:textColor="#777"
                 android:layout_marginTop="4dp" />
+
         </LinearLayout>
 
         <!-- Thông tin công việc -->

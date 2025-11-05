@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_option_unselected"
+    android:padding="12dp"
+    android:layout_marginBottom="10dp">
+
+    <TextView
+        android:id="@+id/txtAddressLine"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="54/59 Bùi Quang Là, Gò Vấp"
+        android:textColor="#222"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/txtCity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TP. Hồ Chí Minh"
+        android:textColor="#777"
+        android:textSize="14sp"
+        android:layout_marginTop="2dp" />
+</LinearLayout>

@@ -66,25 +66,33 @@ public class VerifyActivity extends AppCompatActivity {
                 String res = response.body().string();
 
                 runOnUiThread(() -> {
-                    if (response.isSuccessful()) {
-                        try {
+                    try {
+                        if (response.isSuccessful()) {
                             JSONObject obj = new JSONObject(res);
                             JSONObject result = obj.getJSONObject("result");
                             String token = result.optString("accessToken");
+                            boolean newUser = result.optBoolean("newUser", false);
 
                             SharedPreferences.Editor editor = getSharedPreferences("MyPrefs", MODE_PRIVATE).edit();
                             editor.putString("accessToken", token);
                             editor.apply();
 
-
-                            Toast.makeText(VerifyActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(VerifyActivity.this, MainActivity.class));
+                            if (newUser) {
+                                // Mở màn hình nhập thông tin
+                                Intent intent = new Intent(VerifyActivity.this, CompleteProfileActivity.class);
+                                startActivity(intent);
+                            } else {
+                                // Vào MainActivity
+                                startActivity(new Intent(VerifyActivity.this, MainActivity.class));
+                            }
                             finish();
-                        } catch (Exception e) {
-                            Toast.makeText(VerifyActivity.this, "Lỗi khi xử lý phản hồi", Toast.LENGTH_SHORT).show();
+
+                        } else {
+                            Toast.makeText(VerifyActivity.this, "Mã OTP không hợp lệ", Toast.LENGTH_SHORT).show();
                         }
-                    } else {
-                        Toast.makeText(VerifyActivity.this, "Mã OTP không hợp lệ", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(VerifyActivity.this, "Lỗi khi xử lý phản hồi", Toast.LENGTH_SHORT).show();
                     }
                 });
             }

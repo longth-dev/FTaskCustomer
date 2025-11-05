@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true" />
 
+
     <!-- 🔹 Nội dung cuộn -->
     <ScrollView
         android:id="@+id/scrollView"

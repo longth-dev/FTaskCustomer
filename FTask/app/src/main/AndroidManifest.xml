@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -13,6 +15,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FTask">
+        <activity
+            android:name=".ui.auth.CompleteProfileActivity"
+            android:exported="false" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDcHWb-YPhkGk9er_TwN6A4xTV21Wi0Iq8" />
+
+        <activity android:name=".ui.home.AddressListActivity" />
         <activity android:name=".ui.home.GeneralOrderActivity" />
         <activity android:name=".ui.home.OrderCleaningActivity" />
         <activity android:name=".ui.home.ScheduleActivity" />
@@ -22,16 +33,14 @@
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="true">
-<!--        <activity-->
-<!--            android:name=".MainActivity"-->
-<!--            android:exported="true">-->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
+        <activity android:name=".MainActivity" /> <!-- ✅ Thêm activity chọn bản đồ -->
+        <activity android:name=".ui.home.MapPickerActivity" />
     </application>
 
 </manifest>
