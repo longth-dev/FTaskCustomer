@@ -24,6 +24,8 @@
             android:value="AIzaSyDcHWb-YPhkGk9er_TwN6A4xTV21Wi0Iq8" />
 
         <activity android:name=".ui.home.AddressListActivity" />
+            <activity android:name=".ui.message.ChatDetailActivity"
+            android:exported="false" />
         <activity android:name=".ui.home.GeneralOrderActivity" />
         <activity android:name=".ui.home.OrderCleaningActivity" />
         <activity android:name=".ui.home.ScheduleActivity" />
