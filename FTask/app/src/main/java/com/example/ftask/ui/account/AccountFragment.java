@@ -72,13 +72,19 @@ public class AccountFragment extends Fragment {
                 response -> {
                     try {
                         JSONObject result = response.getJSONObject("result");
+
+                        // Lấy dữ liệu từ JSON
+                        String fullName = result.optString("fullName", "Chưa có tên");
                         String phone = result.optString("phone", "N/A");
                         String role = result.optString("role", "Khách hàng");
+                        String email = result.optString("email", "Chưa cập nhật email");
 
-                        txtFullName.setText("Khách hàng #" + result.optInt("id", 0));
-                        txtEmail.setText("Chưa cập nhật email");
+                        // Hiển thị thông tin lên UI
+                        txtFullName.setText(fullName);
+                        txtEmail.setText(email);
                         txtPhone.setText(phone);
                         txtRole.setText(role);
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Toast.makeText(requireContext(), "Lỗi xử lý dữ liệu người dùng", Toast.LENGTH_SHORT).show();
@@ -105,6 +111,7 @@ public class AccountFragment extends Fragment {
 
         queue.add(request);
     }
+
 
     private void logoutUser() {
         SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);

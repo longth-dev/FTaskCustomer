@@ -1,8 +1,13 @@
 package com.example.ftask.ui.home;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -11,10 +16,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.example.ftask.R;
 
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import me.relex.circleindicator.CircleIndicator3;
 import okhttp3.Call;
@@ -32,6 +34,8 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class HomeFragment extends Fragment {
 
@@ -42,6 +46,7 @@ public class HomeFragment extends Fragment {
 
     private RecyclerView rvServices;
     private ServiceAdapter serviceAdapter;
+    private TextView tvGreeting;
 
     private List<Integer> images = Arrays.asList(
             R.drawable.viecnha,
@@ -66,6 +71,10 @@ public class HomeFragment extends Fragment {
         indicator.setViewPager(viewPager2);
         startAutoSlide();
 
+        // 👋 Greeting
+        tvGreeting = view.findViewById(R.id.tvGreeting);
+        fetchUserName(tvGreeting);
+
         // 🔧 Service RecyclerView
         rvServices = view.findViewById(R.id.rvServices);
         rvServices.setLayoutManager(
@@ -79,12 +88,13 @@ public class HomeFragment extends Fragment {
             startActivity(intent);
         });
 
-
         rvServices.setAdapter(serviceAdapter);
         loadServices();
 
         return view;
     }
+
+    // ✅ Lấy danh sách dịch vụ
     private void loadServices() {
         OkHttpClient client = new OkHttpClient();
 
@@ -103,7 +113,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                String res = response.body().string();
+                String res = Objects.requireNonNull(response.body()).string();
 
                 if (response.isSuccessful()) {
                     try {
@@ -139,6 +149,58 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    // ✅ Lấy tên người dùng từ API /users/me
+    private void fetchUserName(TextView tvGreeting) {
+        OkHttpClient client = new OkHttpClient();
+
+        SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        String token = prefs.getString("accessToken", null);
+
+        Request.Builder builder = new Request.Builder()
+                .url("https://ftask.anhtudev.works/users/me")
+                .get()
+                .addHeader("Content-Type", "application/json");
+
+        if (token != null) {
+            builder.addHeader("Authorization", "Bearer " + token);
+        }
+
+        Request request = builder.build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                if (getActivity() != null)
+                    getActivity().runOnUiThread(() ->
+                            tvGreeting.setText("Xin chào!"));
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                String res = Objects.requireNonNull(response.body()).string();
+
+                if (response.isSuccessful()) {
+                    try {
+                        JSONObject obj = new JSONObject(res);
+                        JSONObject result = obj.getJSONObject("result");
+                        String fullName = result.optString("fullName", "bạn");
+
+                        if (getActivity() != null)
+                            getActivity().runOnUiThread(() ->
+                                    tvGreeting.setText("Xin chào " + fullName));
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        if (getActivity() != null)
+                            getActivity().runOnUiThread(() ->
+                                    tvGreeting.setText("Xin chào!"));
+                    }
+                }
+            }
+        });
+    }
+
+    // 🌀 Tự động trượt banner
     private void startAutoSlide() {
         handler.removeCallbacksAndMessages(null);
         slideRunnable = () -> {

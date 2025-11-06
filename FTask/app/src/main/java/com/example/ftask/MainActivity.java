@@ -2,13 +2,26 @@ package com.example.ftask;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.ftask.databinding.ActivityMainBinding;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,17 +35,21 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Lấy NavController từ NavHostFragment
         NavHostFragment navHostFragment = (NavHostFragment)
                 getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main);
-
         navController = navHostFragment.getNavController();
 
-        // Thiết lập NavigationUI với BottomNavigationView
         NavigationUI.setupWithNavController(binding.navView, navController);
 
-        // Xử lý intent nếu có
+        loadUnreadCount(binding.navView);
+
         handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadUnreadCount(binding.navView);
     }
 
     @Override
@@ -44,8 +61,50 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleIntent(Intent intent) {
         if (intent != null && intent.getBooleanExtra("OPEN_HOME_FRAGMENT", false)) {
-            // Điều hướng tới HomeFragment
             navController.navigate(R.id.homeFragment);
         }
+    }
+    private void loadUnreadCount(@NonNull BottomNavigationView bottomNavigationView) {
+        String token = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+                .getString("accessToken", null);
+
+        if (token == null) {
+            return;
+        }
+
+        String url = "https://ftask.anhtudev.works/notifications/unread-count";
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        int count = response.getInt("result");
+
+                        BadgeDrawable badge = bottomNavigationView.getOrCreateBadge(R.id.notificationFragment);
+
+                        if (count > 0) {
+                            badge.setVisible(true);
+                            badge.setNumber(count);
+                            badge.setBackgroundColor(getColor(android.R.color.holo_red_dark));
+                        } else {
+                            badge.clearNumber();
+                            badge.setVisible(false);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                },
+                error -> {
+                    Toast.makeText(this, "Không thể tải số thông báo chưa đọc", Toast.LENGTH_SHORT).show();
+                }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+
+        queue.add(request);
     }
 }

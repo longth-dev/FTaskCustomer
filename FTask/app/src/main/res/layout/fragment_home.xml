@@ -27,10 +27,11 @@
                     android:id="@+id/tvGreeting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Xin chào Long Trương"
+                    android:text="Xin chào!"
                     android:textColor="@android:color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />
+
 
                 <TextView
                     android:id="@+id/tvSubtitle"
