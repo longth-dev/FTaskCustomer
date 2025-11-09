@@ -65,6 +65,7 @@ public class AddressListActivity extends AppCompatActivity {
                         setupRecycler(addresses);
                     } else {
                         Toast.makeText(this, "Danh sách địa chỉ trống", Toast.LENGTH_SHORT).show();
+                        recyclerAddresses.setAdapter(null);
                     }
                 },
                 error -> {
@@ -103,7 +104,7 @@ public class AddressListActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_ADD_ADDRESS && resultCode == RESULT_OK) {
-            // Khi thêm địa chỉ mới từ MapPickerActivity xong, reload danh sách
+            // Reload khi thêm địa chỉ mới
             loadAddresses();
         }
     }
