@@ -171,6 +171,17 @@
                     android:textSize="14sp"
                     android:textColor="#555" />
 
+                <Button
+                    android:id="@+id/btnTopUp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="💰 Nạp tiền"
+                    android:textAllCaps="false"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginTop="12dp"
+                    android:backgroundTint="#4CAF50"
+                    android:paddingVertical="10dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

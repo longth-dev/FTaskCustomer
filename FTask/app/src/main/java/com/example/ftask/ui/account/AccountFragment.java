@@ -2,14 +2,17 @@ package com.example.ftask.ui.account;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AlertDialog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -41,7 +44,7 @@ public class AccountFragment extends Fragment {
     private TextView txtFullName, txtEmail, txtPhone, txtRole;
     private TextView txtBalance, txtTotalEarned, txtTotalWithdrawn;
     private ImageView imgAvatar;
-    private Button btnLogout;
+    private Button btnLogout, btnTopUp;
     private RecyclerView rvTransactions;
     private TransactionAdapter transactionAdapter;
     private List<Transaction> transactionList = new ArrayList<>();
@@ -71,6 +74,10 @@ public class AccountFragment extends Fragment {
         transactionAdapter = new TransactionAdapter(transactionList);
         rvTransactions.setAdapter(transactionAdapter);
 
+        // Nút nạp tiền
+        btnTopUp = view.findViewById(R.id.btnTopUp);
+        btnTopUp.setOnClickListener(v -> showTopUpDialog());
+
         // Nút đăng xuất
         btnLogout = view.findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(v -> logoutUser());
@@ -80,10 +87,172 @@ public class AccountFragment extends Fragment {
         fetchWalletInfo();
         fetchTransactions();
 
+        // Xử lý callback từ VNPay
+        handleVNPayCallback();
+
         return view;
     }
 
-    // Lấy thông tin người dùng
+    // Hiển thị dialog nhập số tiền nạp
+    private void showTopUpDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("💰 Nạp tiền vào ví");
+
+        // Tạo EditText để nhập số tiền
+        final EditText input = new EditText(requireContext());
+        input.setHint("Nhập số tiền (VNĐ)");
+        input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        input.setPadding(50, 30, 50, 30);
+        builder.setView(input);
+
+        builder.setPositiveButton("Nạp tiền", (dialog, which) -> {
+            String amountStr = input.getText().toString().trim();
+            if (amountStr.isEmpty()) {
+                Toast.makeText(requireContext(), "Vui lòng nhập số tiền", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                int amount = Integer.parseInt(amountStr);
+                if (amount < 10000) {
+                    Toast.makeText(requireContext(), "Số tiền tối thiểu 10,000₫", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                initiateTopUp(amount);
+            } catch (NumberFormatException e) {
+                Toast.makeText(requireContext(), "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
+    // Gọi API nạp tiền
+    private void initiateTopUp(int amount) {
+        // OPTION 1: Nếu bạn đã host HTML redirect page
+//        String callbackUrl = "https://yourusername.github.io/vnpay-redirect.html";
+
+        // OPTION 2: Nếu muốn thử Deep Link trực tiếp (có thể không hoạt động trên VNPay Sandbox)
+         String callbackUrl = "ftask://payment/callback";
+
+        String url = "https://ftask.anhtudev.works/wallets/top-up?amount=" + amount + "&callbackUrl=" + Uri.encode(callbackUrl);
+
+        android.util.Log.d("TopUp", "URL: " + url);
+
+        RequestQueue queue = Volley.newRequestQueue(requireContext());
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, null,
+                response -> {
+                    android.util.Log.d("TopUp", "Response: " + response.toString());
+                    try {
+                        JSONObject result = response.getJSONObject("result");
+                        String paymentUrl = result.getString("paymentUrl");
+
+                        android.util.Log.d("TopUp", "Payment URL: " + paymentUrl);
+
+                        // Mở trình duyệt để thanh toán VNPay
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(paymentUrl));
+                        startActivity(browserIntent);
+
+                        Toast.makeText(requireContext(), "Đang chuyển đến cổng thanh toán...", Toast.LENGTH_SHORT).show();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        android.util.Log.e("TopUp", "JSON Error: " + e.getMessage());
+                        Toast.makeText(requireContext(), "Lỗi khi khởi tạo thanh toán: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    error.printStackTrace();
+                    String errorMsg = "Lỗi không xác định";
+                    if (error.networkResponse != null) {
+                        errorMsg = "HTTP " + error.networkResponse.statusCode;
+                        try {
+                            String responseBody = new String(error.networkResponse.data, "utf-8");
+                            android.util.Log.e("TopUp", "Error Response: " + responseBody);
+                            errorMsg += ": " + responseBody;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else if (error.getMessage() != null) {
+                        errorMsg = error.getMessage();
+                    }
+                    android.util.Log.e("TopUp", "Error: " + errorMsg);
+                    Toast.makeText(requireContext(), "Lỗi kết nối: " + errorMsg, Toast.LENGTH_LONG).show();
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+                String token = prefs.getString("accessToken", null);
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                if (token != null) {
+                    headers.put("Authorization", "Bearer " + token);
+                }
+                return headers;
+            }
+        };
+        queue.add(request);
+    }
+
+    // Xử lý callback từ VNPay khi quay lại app
+    private void handleVNPayCallback() {
+        Intent intent = requireActivity().getIntent();
+        Uri data = intent.getData();
+
+        if (data != null && "ftask".equals(data.getScheme())) {
+            String vnpOrderInfo = data.getQueryParameter("vnp_OrderInfo");
+            String vnpResponseCode = data.getQueryParameter("vnp_ResponseCode");
+            String vnpTransactionStatus = data.getQueryParameter("vnp_TransactionStatus");
+
+            if (vnpOrderInfo != null && vnpResponseCode != null && vnpTransactionStatus != null) {
+                confirmPayment(vnpOrderInfo, vnpResponseCode, vnpTransactionStatus);
+            }
+        }
+    }
+
+    // Xác nhận thanh toán với server
+    private void confirmPayment(String orderInfo, String responseCode, String transactionStatus) {
+        String url = "https://ftask.anhtudev.works/payments/confirm?vnp_OrderInfo=" + orderInfo
+                + "&vnp_ResponseCode=" + responseCode
+                + "&vnp_TransactionStatus=" + transactionStatus;
+
+        RequestQueue queue = Volley.newRequestQueue(requireContext());
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        String message = response.optString("message", "Giao dịch thành công");
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+
+                        // Refresh lại thông tin ví
+                        fetchWalletInfo();
+                        fetchTransactions();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(requireContext(), "Lỗi xác nhận thanh toán", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    error.printStackTrace();
+                    Toast.makeText(requireContext(), "Không thể xác nhận giao dịch", Toast.LENGTH_LONG).show();
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+                String token = prefs.getString("accessToken", null);
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                if (token != null) headers.put("Authorization", "Bearer " + token);
+                return headers;
+            }
+        };
+        queue.add(request);
+    }
+
+    // ... (giữ nguyên các phương thức fetchUserInfo, fetchWalletInfo, fetchTransactions, logoutUser)
+
     private void fetchUserInfo() {
         String url = "https://ftask.anhtudev.works/users/me";
         RequestQueue queue = Volley.newRequestQueue(requireContext());
@@ -118,7 +287,6 @@ public class AccountFragment extends Fragment {
         queue.add(request);
     }
 
-    // Lấy thông tin ví người dùng
     private void fetchWalletInfo() {
         String url = "https://ftask.anhtudev.works/users/wallet";
         RequestQueue queue = Volley.newRequestQueue(requireContext());
@@ -156,7 +324,6 @@ public class AccountFragment extends Fragment {
         queue.add(request);
     }
 
-    // Lấy lịch sử giao dịch
     private void fetchTransactions() {
         String url = "https://ftask.anhtudev.works/users/transactions?page=1&size=20";
         RequestQueue queue = Volley.newRequestQueue(requireContext());
@@ -203,7 +370,6 @@ public class AccountFragment extends Fragment {
         queue.add(request);
     }
 
-    // Đăng xuất người dùng
     private void logoutUser() {
         SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
         prefs.edit().clear().apply();

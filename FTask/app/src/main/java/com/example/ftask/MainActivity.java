@@ -1,6 +1,7 @@
 package com.example.ftask;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -60,10 +61,80 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleIntent(Intent intent) {
-        if (intent != null && intent.getBooleanExtra("OPEN_HOME_FRAGMENT", false)) {
-            navController.navigate(R.id.homeFragment);
+        if (intent != null) {
+            // Xử lý mở Home Fragment
+            if (intent.getBooleanExtra("OPEN_HOME_FRAGMENT", false)) {
+                navController.navigate(R.id.homeFragment);
+            }
+
+            // Xử lý Deep Link từ VNPay callback
+            Uri data = intent.getData();
+            if (data != null && "ftask".equals(data.getScheme())) {
+                String host = data.getHost();
+
+                if ("payment".equals(host)) {
+                    // Chuyển đến AccountFragment và xử lý callback
+                    navController.navigate(R.id.accountFragment);
+                    handleVNPayCallback(data);
+                }
+            }
         }
     }
+
+    private void handleVNPayCallback(Uri data) {
+        String vnpOrderInfo = data.getQueryParameter("vnp_OrderInfo");
+        String vnpResponseCode = data.getQueryParameter("vnp_ResponseCode");
+        String vnpTransactionStatus = data.getQueryParameter("vnp_TransactionStatus");
+
+        if (vnpOrderInfo != null && vnpResponseCode != null && vnpTransactionStatus != null) {
+            confirmPayment(vnpOrderInfo, vnpResponseCode, vnpTransactionStatus);
+        }
+    }
+
+    private void confirmPayment(String orderInfo, String responseCode, String transactionStatus) {
+        String url = "https://ftask.anhtudev.works/payments/confirm?vnp_OrderInfo=" + orderInfo
+                + "&vnp_ResponseCode=" + responseCode
+                + "&vnp_TransactionStatus=" + transactionStatus;
+
+        String token = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+                .getString("accessToken", null);
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        String message = response.optString("message", "Xác nhận giao dịch thành công!");
+                        boolean success = response.optBoolean("success", false);
+
+                        if ("00".equals(responseCode) && success) {
+                            Toast.makeText(this, "✅ Nạp tiền thành công! " + message, Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(this, "❌ Giao dịch thất bại: " + message, Toast.LENGTH_LONG).show();
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Lỗi xác nhận thanh toán", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    error.printStackTrace();
+                    Toast.makeText(this, "Không thể xác nhận giao dịch", Toast.LENGTH_LONG).show();
+                }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                if (token != null) {
+                    headers.put("Authorization", "Bearer " + token);
+                }
+                return headers;
+            }
+        };
+        queue.add(request);
+    }
+
     private void loadUnreadCount(@NonNull BottomNavigationView bottomNavigationView) {
         String token = getSharedPreferences("MyPrefs", MODE_PRIVATE)
                 .getString("accessToken", null);
