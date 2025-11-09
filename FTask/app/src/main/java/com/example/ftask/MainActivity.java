@@ -150,7 +150,8 @@ public class MainActivity extends AppCompatActivity {
                         String message = response.optString("message", "Xác nhận giao dịch thành công!");
                         boolean success = response.optBoolean("success", false);
 
-                        if ("00".equals(responseCode) && success) {
+                        // Chỉ kiểm tra responseCode từ VNPay (00 = thành công)
+                        if ("00".equals(responseCode)) {
                             Toast.makeText(this, "✅ Nạp tiền thành công! " + message, Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(this, "❌ Giao dịch thất bại: " + message, Toast.LENGTH_LONG).show();
