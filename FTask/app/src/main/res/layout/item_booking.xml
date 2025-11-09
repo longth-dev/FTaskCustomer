@@ -1,87 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="6dp"
-    android:layout_marginHorizontal="4dp"
-    card_view:cardCornerRadius="12dp"
-    card_view:cardElevation="4dp"
-    card_view:cardUseCompatPadding="true">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp">
+        android:padding="16dp">
 
-        <!-- Thông tin booking bên trái -->
+        <!-- Phần thông tin booking bên trái -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginEnd="8dp">
+            android:orientation="vertical">
 
+            <!-- Mã đơn -->
             <TextView
                 android:id="@+id/txtBookingId"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Mã đặt chỗ: BK001"
+                android:text="Mã đơn: #123"
                 android:textStyle="bold"
-                android:textColor="#111111"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textColor="#333333"/>
 
-            <TextView
-                android:id="@+id/txtBookingDate"
-                android:layout_width="match_parent"
+            <!-- Ngày làm -->
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ngày: 09/11/2025"
-                android:textColor="#444444"
-                android:textSize="14sp"
-                android:layout_marginTop="2dp" />
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
 
-            <TextView
-                android:id="@+id/txtBookingPrice"
-                android:layout_width="match_parent"
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@android:drawable/ic_menu_today"
+                    android:tint="#666666"
+                    android:layout_gravity="center_vertical"/>
+
+                <TextView
+                    android:id="@+id/txtBookingDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="09/11/2025"
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:layout_marginStart="4dp"/>
+            </LinearLayout>
+
+            <!-- Giờ làm -->
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Giá: 1.200.000đ"
-                android:textColor="#444444"
-                android:textSize="14sp"
-                android:layout_marginTop="2dp" />
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp">
 
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@android:drawable/ic_menu_recent_history"
+                    android:tint="#666666"
+                    android:layout_gravity="center_vertical"/>
+
+                <TextView
+                    android:id="@+id/txtBookingTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="23:58"
+                    android:textSize="14sp"
+                    android:textColor="#666666"
+                    android:layout_marginStart="4dp"/>
+            </LinearLayout>
+
+            <!-- Giá -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@android:drawable/ic_dialog_info"
+                    android:tint="#FF5722"
+                    android:layout_gravity="center_vertical"/>
+
+                <TextView
+                    android:id="@+id/txtBookingPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="500,000đ"
+                    android:textColor="#FF5722"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:layout_marginStart="4dp"/>
+            </LinearLayout>
+
+            <!-- Trạng thái -->
             <TextView
                 android:id="@+id/txtBookingStatus"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Trạng thái: Đang xử lý"
-                android:textColor="#008577"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:layout_marginTop="2dp" />
+                android:text="PENDING"
+                android:background="@drawable/status_background"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"/>
 
+            <!-- Ghi chú -->
             <TextView
                 android:id="@+id/txtBookingNote"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ghi chú: Khách yêu cầu giao buổi sáng"
-                android:textColor="#666666"
-                android:textSize="13sp"
-                android:layout_marginTop="2dp" />
+                android:text="Ghi chú: Không có"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginTop="4dp"
+                android:maxLines="2"
+                android:ellipsize="end"/>
+
         </LinearLayout>
 
-        <!-- Nút Cancel bên phải -->
-        <Button
-            android:id="@+id/btnCancelBooking"
+        <!-- Phần các nút bên phải -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hủy"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#E53935"
-            android:textStyle="bold"
+            android:orientation="vertical"
             android:layout_gravity="center_vertical"
-            android:minWidth="80dp"
-            android:paddingHorizontal="12dp" />
+            android:layout_marginStart="8dp">
+
+            <!-- Nút hủy thông thường -->
+            <Button
+                android:id="@+id/btnCancelBooking"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Hủy đơn"
+                android:backgroundTint="#F44336"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:visibility="gone"/>
+
+            <!-- Nút Đồng ý thiếu người -->
+            <Button
+                android:id="@+id/btnInsufficientAgree"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Đồng ý hủy"
+                android:backgroundTint="#F44336"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:visibility="gone"/>
+
+            <!-- Nút Từ chối thiếu người -->
+            <Button
+                android:id="@+id/btnInsufficientReject"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Từ chối hủy"
+                android:backgroundTint="#4CAF50"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:layout_marginTop="4dp"
+                android:visibility="gone"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
