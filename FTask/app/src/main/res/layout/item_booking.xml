@@ -41,7 +41,6 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:src="@android:drawable/ic_menu_today"
-                    android:tint="#666666"
                     android:layout_gravity="center_vertical"/>
 
                 <TextView
@@ -65,7 +64,6 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:src="@android:drawable/ic_menu_recent_history"
-                    android:tint="#666666"
                     android:layout_gravity="center_vertical"/>
 
                 <TextView
@@ -89,7 +87,6 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:src="@android:drawable/ic_dialog_info"
-                    android:tint="#FF5722"
                     android:layout_gravity="center_vertical"/>
 
                 <TextView
