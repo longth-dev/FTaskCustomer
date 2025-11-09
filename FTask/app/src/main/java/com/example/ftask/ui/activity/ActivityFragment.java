@@ -63,7 +63,6 @@ public class ActivityFragment extends Fragment {
 
         OkHttpClient client = new OkHttpClient();
 
-        // Bước 1: Lấy thông tin user để có customerId
         Request userRequest = new Request.Builder()
                 .url("https://ftask.anhtudev.works/users/me")
                 .addHeader("Authorization", "Bearer " + token)

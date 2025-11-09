@@ -59,6 +59,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
     implementation("com.google.firebase:firebase-messaging")
 
+    implementation("com.google.zxing:core:3.5.3")
+
 
     implementation(libs.appcompat)
     implementation(libs.material)
