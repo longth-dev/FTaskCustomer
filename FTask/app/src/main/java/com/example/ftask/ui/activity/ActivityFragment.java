@@ -45,7 +45,9 @@ public class ActivityFragment extends Fragment {
         recyclerBookings = view.findViewById(R.id.recyclerBookings);
         recyclerBookings.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new BookingAdapter(bookingList);
+        adapter = new BookingAdapter(bookingList, getContext(), () -> {
+            fetchBookings();
+        });
         recyclerBookings.setAdapter(adapter);
 
         fetchBookings();
