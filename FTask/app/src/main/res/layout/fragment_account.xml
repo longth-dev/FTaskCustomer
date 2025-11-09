@@ -171,17 +171,41 @@
                     android:textSize="14sp"
                     android:textColor="#555" />
 
-                <Button
-                    android:id="@+id/btnTopUp"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="💰 Nạp tiền"
-                    android:textAllCaps="false"
-                    android:textStyle="bold"
-                    android:textColor="#FFFFFF"
+                    android:orientation="horizontal"
                     android:layout_marginTop="12dp"
-                    android:backgroundTint="#4CAF50"
-                    android:paddingVertical="10dp" />
+                    android:weightSum="2">
+
+                    <!-- Nút nạp tiền -->
+                    <Button
+                        android:id="@+id/btnTopUp"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="💰 Nạp tiền"
+                        android:textAllCaps="false"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF"
+                        android:backgroundTint="#4CAF50"
+                        android:paddingVertical="10dp"
+                        android:layout_marginEnd="6dp" />
+
+                    <!-- Nút rút tiền -->
+                    <Button
+                        android:id="@+id/btnWithdraw"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="💵 Rút tiền"
+                        android:textAllCaps="false"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF"
+                        android:backgroundTint="#FF9800"
+                        android:paddingVertical="10dp"
+                        android:layout_marginStart="6dp" />
+                </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

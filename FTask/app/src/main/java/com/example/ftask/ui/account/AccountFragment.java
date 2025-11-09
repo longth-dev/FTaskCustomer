@@ -44,7 +44,7 @@ public class AccountFragment extends Fragment {
     private TextView txtFullName, txtEmail, txtPhone, txtRole;
     private TextView txtBalance, txtTotalEarned, txtTotalWithdrawn;
     private ImageView imgAvatar;
-    private Button btnLogout, btnTopUp;
+    private Button btnLogout, btnTopUp, btnWithdraw;
     private RecyclerView rvTransactions;
     private TransactionAdapter transactionAdapter;
     private List<Transaction> transactionList = new ArrayList<>();
@@ -78,6 +78,10 @@ public class AccountFragment extends Fragment {
         btnTopUp = view.findViewById(R.id.btnTopUp);
         btnTopUp.setOnClickListener(v -> showTopUpDialog());
 
+        // Nút rút tiền
+        btnWithdraw = view.findViewById(R.id.btnWithdraw);
+        btnWithdraw.setOnClickListener(v -> showWithdrawDialog());
+
         // Nút đăng xuất
         btnLogout = view.findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(v -> logoutUser());
@@ -87,9 +91,6 @@ public class AccountFragment extends Fragment {
         fetchWalletInfo();
         fetchTransactions();
 
-        // Xử lý callback từ VNPay
-        handleVNPayCallback();
-
         return view;
     }
 
@@ -98,7 +99,6 @@ public class AccountFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle("💰 Nạp tiền vào ví");
 
-        // Tạo EditText để nhập số tiền
         final EditText input = new EditText(requireContext());
         input.setHint("Nhập số tiền (VNĐ)");
         input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
@@ -127,14 +127,42 @@ public class AccountFragment extends Fragment {
         builder.show();
     }
 
+    // Hiển thị dialog nhập số tiền rút
+    private void showWithdrawDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("💵 Rút tiền từ ví");
+
+        final EditText input = new EditText(requireContext());
+        input.setHint("Nhập số tiền cần rút (VNĐ)");
+        input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        input.setPadding(50, 30, 50, 30);
+        builder.setView(input);
+
+        builder.setPositiveButton("Rút tiền", (dialog, which) -> {
+            String amountStr = input.getText().toString().trim();
+            if (amountStr.isEmpty()) {
+                Toast.makeText(requireContext(), "Vui lòng nhập số tiền", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                int amount = Integer.parseInt(amountStr);
+                if (amount < 10000) {
+                    Toast.makeText(requireContext(), "Số tiền tối thiểu 10,000₫", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                initiateWithdrawal(amount);
+            } catch (NumberFormatException e) {
+                Toast.makeText(requireContext(), "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
     // Gọi API nạp tiền
     private void initiateTopUp(int amount) {
-        // OPTION 1: Nếu bạn đã host HTML redirect page
-//        String callbackUrl = "https://yourusername.github.io/vnpay-redirect.html";
-
-        // OPTION 2: Nếu muốn thử Deep Link trực tiếp (có thể không hoạt động trên VNPay Sandbox)
-         String callbackUrl = "ftask://payment/callback";
-
+        String callbackUrl = "ftask://payment/callback";
         String url = "https://ftask.anhtudev.works/wallets/top-up?amount=" + amount + "&callbackUrl=" + Uri.encode(callbackUrl);
 
         android.util.Log.d("TopUp", "URL: " + url);
@@ -150,7 +178,6 @@ public class AccountFragment extends Fragment {
 
                         android.util.Log.d("TopUp", "Payment URL: " + paymentUrl);
 
-                        // Mở trình duyệt để thanh toán VNPay
                         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(paymentUrl));
                         startActivity(browserIntent);
 
@@ -195,48 +222,57 @@ public class AccountFragment extends Fragment {
         queue.add(request);
     }
 
-    // Xử lý callback từ VNPay khi quay lại app
-    private void handleVNPayCallback() {
-        Intent intent = requireActivity().getIntent();
-        Uri data = intent.getData();
+    // Gọi API rút tiền
+    private void initiateWithdrawal(int amount) {
+        String url = "https://ftask.anhtudev.works/wallets/withdrawal?amount=" + amount;
 
-        if (data != null && "ftask".equals(data.getScheme())) {
-            String vnpOrderInfo = data.getQueryParameter("vnp_OrderInfo");
-            String vnpResponseCode = data.getQueryParameter("vnp_ResponseCode");
-            String vnpTransactionStatus = data.getQueryParameter("vnp_TransactionStatus");
-
-            if (vnpOrderInfo != null && vnpResponseCode != null && vnpTransactionStatus != null) {
-                confirmPayment(vnpOrderInfo, vnpResponseCode, vnpTransactionStatus);
-            }
-        }
-    }
-
-    // Xác nhận thanh toán với server
-    private void confirmPayment(String orderInfo, String responseCode, String transactionStatus) {
-        String url = "https://ftask.anhtudev.works/payments/confirm?vnp_OrderInfo=" + orderInfo
-                + "&vnp_ResponseCode=" + responseCode
-                + "&vnp_TransactionStatus=" + transactionStatus;
+        android.util.Log.d("Withdrawal", "URL: " + url);
 
         RequestQueue queue = Volley.newRequestQueue(requireContext());
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, null,
                 response -> {
+                    android.util.Log.d("Withdrawal", "Response: " + response.toString());
                     try {
-                        String message = response.optString("message", "Giao dịch thành công");
-                        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+                        String message = response.optString("message", "Yêu cầu rút tiền thành công!");
+                        Toast.makeText(requireContext(), "✅ " + message, Toast.LENGTH_LONG).show();
 
-                        // Refresh lại thông tin ví
+                        // Refresh lại thông tin ví và lịch sử giao dịch
                         fetchWalletInfo();
                         fetchTransactions();
 
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Toast.makeText(requireContext(), "Lỗi xác nhận thanh toán", Toast.LENGTH_SHORT).show();
+                        android.util.Log.e("Withdrawal", "Error: " + e.getMessage());
+                        Toast.makeText(requireContext(), "Lỗi xử lý phản hồi", Toast.LENGTH_SHORT).show();
                     }
                 },
                 error -> {
                     error.printStackTrace();
-                    Toast.makeText(requireContext(), "Không thể xác nhận giao dịch", Toast.LENGTH_LONG).show();
+                    String errorMsg = "Lỗi không xác định";
+                    if (error.networkResponse != null) {
+                        errorMsg = "HTTP " + error.networkResponse.statusCode;
+                        try {
+                            String responseBody = new String(error.networkResponse.data, "utf-8");
+                            android.util.Log.e("Withdrawal", "Error Response: " + responseBody);
+
+                            // Parse error message từ server
+                            try {
+                                JSONObject errorJson = new JSONObject(responseBody);
+                                String serverMsg = errorJson.optString("message", "");
+                                if (!serverMsg.isEmpty()) {
+                                    errorMsg = serverMsg;
+                                }
+                            } catch (JSONException ignored) {}
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    } else if (error.getMessage() != null) {
+                        errorMsg = error.getMessage();
+                    }
+                    android.util.Log.e("Withdrawal", "Error: " + errorMsg);
+                    Toast.makeText(requireContext(), "❌ " + errorMsg, Toast.LENGTH_LONG).show();
                 }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
@@ -244,14 +280,16 @@ public class AccountFragment extends Fragment {
                 String token = prefs.getString("accessToken", null);
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Content-Type", "application/json");
-                if (token != null) headers.put("Authorization", "Bearer " + token);
+                if (token != null) {
+                    headers.put("Authorization", "Bearer " + token);
+                }
                 return headers;
             }
         };
         queue.add(request);
     }
 
-    // ... (giữ nguyên các phương thức fetchUserInfo, fetchWalletInfo, fetchTransactions, logoutUser)
+    // Các phương thức khác giữ nguyên...
 
     private void fetchUserInfo() {
         String url = "https://ftask.anhtudev.works/users/me";
