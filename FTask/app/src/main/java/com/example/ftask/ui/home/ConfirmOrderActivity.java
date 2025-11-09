@@ -104,7 +104,7 @@ public class ConfirmOrderActivity extends AppCompatActivity {
             body.put("addressId",addressId);
             body.put("startAt",startAt);
             body.put("customerNote",note!=null?note:"");
-            String method = selectedPayment==layoutCash?"CASH":"VNPAY";
+            String method = selectedPayment==layoutCash?"CASH":"WALLET";
             body.put("method",method);
         }catch(JSONException e){
             e.printStackTrace();

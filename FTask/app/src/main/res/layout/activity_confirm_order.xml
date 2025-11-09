@@ -171,13 +171,13 @@
             <ImageView
                 android:layout_width="28dp"
                 android:layout_height="28dp"
-                android:src="@drawable/atmcard"
+                android:src="@drawable/ic_wallet"
                 android:layout_marginEnd="12dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Thẻ ATM / Ví điện tử"
+                android:text="WALLET"
                 android:textColor="#333"
                 android:textSize="15sp"
                 android:textStyle="bold" />
