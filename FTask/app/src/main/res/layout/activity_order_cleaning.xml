@@ -5,21 +5,11 @@
     android:layout_height="match_parent"
     android:background="#F8F8F8">
 
-    <!-- 🔹 Header địa chỉ -->
-    <include
-        android:id="@+id/addressHeader"
-        layout="@layout/layout_address_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true" />
-
-
     <!-- 🔹 Nội dung cuộn -->
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/addressHeader"
         android:layout_above="@id/bottomBar"
         android:fillViewport="true">
 
@@ -29,7 +19,27 @@
             android:layout_height="wrap_content"
             android:padding="16dp">
 
-            <!-- Tiêu đề -->
+            <!-- 🔹 Tiêu đề giới thiệu -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bạn muốn nhà mình sạch sẽ, ngăn nắp?"
+                android:textColor="#333333"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:gravity="center"
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="8dp" />
+
+            <!-- 🔹 Phần chọn địa chỉ (đưa từ header xuống) -->
+            <include
+                android:id="@+id/addressHeader"
+                layout="@layout/layout_address_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp" />
+
+            <!-- 🔹 Phần còn lại giữ nguyên -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -47,7 +57,6 @@
                 android:textSize="14sp"
                 android:layout_marginBottom="12dp" />
 
-            <!-- 🔹 Container để thêm gói dịch vụ động -->
             <LinearLayout
                 android:id="@+id/layoutVariantContainer"
                 android:layout_width="match_parent"
@@ -57,7 +66,6 @@
                 android:showDividers="middle"
                 android:layout_marginBottom="16dp" />
 
-            <!-- 🔹 Tiêu đề dịch vụ thêm -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -67,7 +75,6 @@
                 android:textSize="18sp"
                 android:layout_marginBottom="6dp" />
 
-            <!-- 🔹 Chi tiết công việc -->
             <LinearLayout
                 android:id="@+id/layoutJobDetails"
                 android:layout_width="match_parent"
@@ -77,7 +84,6 @@
                 android:padding="14dp"
                 android:layout_marginBottom="20dp">
 
-                <!-- Header mở rộng -->
                 <LinearLayout
                     android:id="@+id/headerJobDetails"
                     android:layout_width="match_parent"
@@ -101,7 +107,6 @@
                         android:src="@drawable/rightarrow" />
                 </LinearLayout>
 
-                <!-- Nội dung tab (ẩn mặc định) -->
                 <LinearLayout
                     android:id="@+id/jobDetailContent"
                     android:layout_width="match_parent"

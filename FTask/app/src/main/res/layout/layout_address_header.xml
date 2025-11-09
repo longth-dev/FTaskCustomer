@@ -1,42 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="56dp"
+    android:layout_height="60dp"
     android:background="#FFFFFF"
-    android:paddingHorizontal="12dp"
-    android:gravity="center_vertical"
-    android:elevation="6dp">
+    android:elevation="6dp"
+    android:paddingHorizontal="12dp">
 
-    <!-- Nút quay lại -->
+    <!-- 🔹 Nút quay lại -->
     <ImageView
         android:id="@+id/btnBack"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:src="@drawable/ic_back"
-        android:layout_centerVertical="true" />
+        android:contentDescription="Back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!-- Icon vị trí -->
+    <!-- 🔹 Icon vị trí -->
     <ImageView
         android:id="@+id/icLocation"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:src="@drawable/ic_location_red"
-        android:layout_centerVertical="true"
-        android:layout_marginStart="12dp"
-        android:layout_toEndOf="@id/btnBack" />
+        android:contentDescription="Location Icon"
+        app:layout_constraintStart_toEndOf="@id/btnBack"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        android:layout_marginStart="10dp" />
 
-    <!-- Địa chỉ hiển thị -->
+    <!-- 🔹 Địa chỉ hiển thị -->
     <LinearLayout
         android:id="@+id/layoutAddress"
         android:orientation="vertical"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:layout_marginStart="8dp"
-        android:layout_toEndOf="@id/icLocation"
-        android:layout_toStartOf="@id/btnInfo"
-        android:layout_weight="1">
+        app:layout_constraintStart_toEndOf="@id/icLocation"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnInfo"
+        app:layout_constraintHorizontal_chainStyle="packed">
 
-        <!-- Địa chỉ rút gọn -->
         <TextView
             android:id="@+id/txtShortAddress"
             android:layout_width="wrap_content"
@@ -44,26 +52,30 @@
             android:text="Chọn vị trí"
             android:textColor="#000"
             android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
 
-        <!-- Địa chỉ đầy đủ -->
         <TextView
             android:id="@+id/txtFullAddress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="#555"
-            android:textSize="13sp" />
-
+            android:text="(Chưa chọn địa chỉ)"
+            android:textColor="#777"
+            android:textSize="13sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
     </LinearLayout>
 
-    <!-- Icon info -->
+    <!-- 🔹 Icon thông tin -->
     <ImageView
         android:id="@+id/btnInfo"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:src="@drawable/ic_info"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true" />
+        android:contentDescription="Info"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
