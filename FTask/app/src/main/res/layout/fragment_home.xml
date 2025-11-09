@@ -32,7 +32,6 @@
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
-
                 <TextView
                     android:id="@+id/tvSubtitle"
                     android:layout_width="wrap_content"
@@ -41,6 +40,37 @@
                     android:textColor="@android:color/white"
                     android:textSize="14sp"
                     android:layout_marginTop="4dp"/>
+
+            </LinearLayout>
+
+            <!-- Wallet Balance - Bên trái lá cờ -->
+            <LinearLayout
+                android:id="@+id/layoutWallet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="60dp"
+                android:gravity="end">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Số dư ví"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    android:alpha="0.9"/>
+
+                <TextView
+                    android:id="@+id/tvBalance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 VND"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="2dp"/>
+
             </LinearLayout>
 
             <ImageView
@@ -76,8 +106,6 @@
             app:ci_height="10dp"
             app:ci_margin="6dp"
             app:ci_drawable="@drawable/indicator_selector"/>
-
-
 
         <TextView
             android:id="@+id/tvServiceTitle"

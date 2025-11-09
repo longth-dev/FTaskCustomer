@@ -23,9 +23,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import me.relex.circleindicator.CircleIndicator3;
@@ -47,6 +49,7 @@ public class HomeFragment extends Fragment {
     private RecyclerView rvServices;
     private ServiceAdapter serviceAdapter;
     private TextView tvGreeting;
+    private TextView tvBalance;
 
     private List<Integer> images = Arrays.asList(
             R.drawable.viecnha,
@@ -75,6 +78,10 @@ public class HomeFragment extends Fragment {
         tvGreeting = view.findViewById(R.id.tvGreeting);
         fetchUserName(tvGreeting);
 
+        // 💰 Balance - Thêm phần này
+        tvBalance = view.findViewById(R.id.tvBalance);
+        fetchWalletBalance();
+
         // 🔧 Service RecyclerView
         rvServices = view.findViewById(R.id.rvServices);
         rvServices.setLayoutManager(
@@ -92,6 +99,73 @@ public class HomeFragment extends Fragment {
         loadServices();
 
         return view;
+    }
+
+    // ✅ Phương thức mới để lấy thông tin ví
+    private void fetchWalletBalance() {
+        OkHttpClient client = new OkHttpClient();
+
+        // Lấy token từ SharedPreferences
+        SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        String token = prefs.getString("accessToken", null);
+
+        if (token == null) {
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() ->
+                        tvBalance.setText("0 VND"));
+            }
+            return;
+        }
+
+        Request request = new Request.Builder()
+                .url("https://ftask.anhtudev.works/users/wallet")
+                .addHeader("Authorization", "Bearer " + token)
+                .get()
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        tvBalance.setText("0 VND");
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                String res = Objects.requireNonNull(response.body()).string();
+
+                if (response.isSuccessful()) {
+                    try {
+                        JSONObject obj = new JSONObject(res);
+                        JSONObject result = obj.getJSONObject("result");
+                        double balance = result.getDouble("balance");
+
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                // Format số tiền theo định dạng VND
+                                NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+                                String formattedBalance = formatter.format(balance) + " VND";
+                                tvBalance.setText(formattedBalance);
+                            });
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() ->
+                                    tvBalance.setText("0 VND"));
+                        }
+                    }
+                } else {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() ->
+                                tvBalance.setText("0 VND"));
+                    }
+                }
+            }
+        });
     }
 
     // ✅ Lấy danh sách dịch vụ
