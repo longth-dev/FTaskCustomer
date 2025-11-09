@@ -36,9 +36,6 @@ public class ActivityFragment extends Fragment {
     private BookingAdapter adapter;
     private List<Booking> bookingList = new ArrayList<>();
 
-    private static final String API_URL =
-            "https://ftask.anhtudev.works/customer/bookings?page=1&size=10&fromDate=2025-10-30T23%3A59%3A59%2B07%3A00&toDate=2027-10-30T23%3A59%3A59%2B07%3A00";
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -63,17 +60,19 @@ public class ActivityFragment extends Fragment {
         }
 
         OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(API_URL)
+
+        // Bước 1: Lấy thông tin user để có customerId
+        Request userRequest = new Request.Builder()
+                .url("https://ftask.anhtudev.works/users/me")
                 .addHeader("Authorization", "Bearer " + token)
                 .build();
 
-        client.newCall(request).enqueue(new Callback() {
+        client.newCall(userRequest).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 if (getActivity() != null)
                     getActivity().runOnUiThread(() ->
-                            Toast.makeText(getContext(), "Lỗi mạng: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                            Toast.makeText(getContext(), "Lỗi lấy thông tin user: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
 
             @Override
@@ -81,13 +80,62 @@ public class ActivityFragment extends Fragment {
                 if (!response.isSuccessful()) {
                     if (getActivity() != null)
                         getActivity().runOnUiThread(() ->
-                                Toast.makeText(getContext(), "Không thể tải dữ liệu (" + response.code() + ")", Toast.LENGTH_SHORT).show());
+                                Toast.makeText(getContext(), "Không thể lấy thông tin user (" + response.code() + ")", Toast.LENGTH_SHORT).show());
                     return;
                 }
 
                 try {
                     String jsonData = response.body().string();
-                    Log.d("API_RESPONSE", jsonData);
+                    Log.d("API_USER", jsonData);
+
+                    JSONObject root = new JSONObject(jsonData);
+                    JSONObject result = root.getJSONObject("result");
+                    int customerId = result.getInt("customerId");
+
+                    // Bước 2: Lấy bookings dựa vào customerId
+                    fetchBookingsByCustomerId(client, token, customerId);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    if (getActivity() != null)
+                        getActivity().runOnUiThread(() ->
+                                Toast.makeText(getContext(), "Lỗi xử lý dữ liệu user", Toast.LENGTH_SHORT).show());
+                }
+            }
+        });
+    }
+
+    private void fetchBookingsByCustomerId(OkHttpClient client, String token, int customerId) {
+        String bookingsUrl = "https://ftask.anhtudev.works/bookings?page=1&size=1000" +
+                "&fromDate=2025-10-30T23%3A59%3A59%2B07%3A00" +
+                "&toDate=2127-10-30T23%3A59%3A59%2B07%3A00" +
+                "&customerId=" + customerId;
+
+        Request bookingsRequest = new Request.Builder()
+                .url(bookingsUrl)
+                .addHeader("Authorization", "Bearer " + token)
+                .build();
+
+        client.newCall(bookingsRequest).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                if (getActivity() != null)
+                    getActivity().runOnUiThread(() ->
+                            Toast.makeText(getContext(), "Lỗi lấy bookings: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    if (getActivity() != null)
+                        getActivity().runOnUiThread(() ->
+                                Toast.makeText(getContext(), "Không thể tải bookings (" + response.code() + ")", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                try {
+                    String jsonData = response.body().string();
+                    Log.d("API_BOOKINGS", jsonData);
 
                     JSONObject root = new JSONObject(jsonData);
                     JSONObject result = root.getJSONObject("result");
@@ -112,7 +160,7 @@ public class ActivityFragment extends Fragment {
                     e.printStackTrace();
                     if (getActivity() != null)
                         getActivity().runOnUiThread(() ->
-                                Toast.makeText(getContext(), "Lỗi xử lý dữ liệu", Toast.LENGTH_SHORT).show());
+                                Toast.makeText(getContext(), "Lỗi xử lý dữ liệu bookings", Toast.LENGTH_SHORT).show());
                 }
             }
         });
