@@ -8,15 +8,19 @@ import org.json.JSONObject;
 import java.io.IOException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.example.ftask.MainActivity;
 import com.example.ftask.R;
+import com.example.ftask.ui.auth.CompleteProfileActivity;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class VerifyActivity extends AppCompatActivity {
 
     private EditText edtOtp;
     private Button btnVerify;
     private String phone;
+    private static final String TAG = "VerifyActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +29,6 @@ public class VerifyActivity extends AppCompatActivity {
 
         edtOtp = findViewById(R.id.edtOtp);
         btnVerify = findViewById(R.id.btnVerify);
-
         phone = getIntent().getStringExtra("phone");
 
         btnVerify.setOnClickListener(v -> verifyOtp());
@@ -41,7 +44,6 @@ public class VerifyActivity extends AppCompatActivity {
 
         OkHttpClient client = new OkHttpClient();
         JSONObject json = new JSONObject();
-
         try {
             json.put("phone", phone);
             json.put("otp", otp);
@@ -57,13 +59,22 @@ public class VerifyActivity extends AppCompatActivity {
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) {
+            @Override
+            public void onFailure(Call call, IOException e) {
                 runOnUiThread(() ->
                         Toast.makeText(VerifyActivity.this, "Không thể kết nối máy chủ", Toast.LENGTH_SHORT).show());
             }
 
-            @Override public void onResponse(Call call, Response response) throws IOException {
-                String res = response.body().string();
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                ResponseBody responseBody = response.body();
+                if (responseBody == null) {
+                    runOnUiThread(() ->
+                            Toast.makeText(VerifyActivity.this, "Server trả về dữ liệu trống", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+
+                String res = responseBody.string();
 
                 runOnUiThread(() -> {
                     try {
@@ -73,19 +84,33 @@ public class VerifyActivity extends AppCompatActivity {
                             String token = result.optString("accessToken");
                             boolean newUser = result.optBoolean("newUser", false);
 
+                            // Lưu accessToken
                             SharedPreferences.Editor editor = getSharedPreferences("MyPrefs", MODE_PRIVATE).edit();
                             editor.putString("accessToken", token);
                             editor.apply();
 
+                            // Lấy FCM token
+                            FirebaseMessaging.getInstance().getToken()
+                                    .addOnCompleteListener(task -> {
+                                        if (task.isSuccessful()) {
+                                            String fcmToken = task.getResult();
+                                            Log.i(TAG, "Device FCM token: " + fcmToken);
+                                            // TODO: Gửi fcmToken lên server kèm accessToken nếu cần
+                                        } else {
+                                            Log.w(TAG, "Failed to get FCM token", task.getException());
+                                        }
+                                    });
+
+                            // Mở Activity tiếp theo
+                            Intent intent;
                             if (newUser) {
-                                // Mở màn hình nhập thông tin
-                                Intent intent = new Intent(VerifyActivity.this, CompleteProfileActivity.class);
-                                startActivity(intent);
+                                intent = new Intent(VerifyActivity.this, CompleteProfileActivity.class);
                             } else {
-                                // Vào MainActivity
-                                startActivity(new Intent(VerifyActivity.this, MainActivity.class));
+                                intent = new Intent(VerifyActivity.this, MainActivity.class);
                             }
-                            finish();
+                            // Xóa stack để user không back lại Verify
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
 
                         } else {
                             Toast.makeText(VerifyActivity.this, "Mã OTP không hợp lệ", Toast.LENGTH_SHORT).show();

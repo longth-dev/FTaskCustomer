@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     android:background="#F4F6F9"
     android:padding="16dp"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:scrollbars="none">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -55,7 +56,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             card_view:cardCornerRadius="16dp"
-            card_view:cardElevation="4dp"
+            card_view:cardElevation="0dp"
             android:layout_marginBottom="16dp"
             android:backgroundTint="#FFFFFF">
 
@@ -113,6 +114,84 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- 🪙 Card thông tin ví -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            card_view:cardCornerRadius="16dp"
+            card_view:cardElevation="0dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="#FFFFFF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Số dư -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/wallet"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:id="@+id/txtBalance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0₫"
+                        android:textSize="16sp"
+                        android:textColor="#333" />
+                </LinearLayout>
+
+                <!-- Tổng kiếm được -->
+                <TextView
+                    android:id="@+id/txtTotalEarned"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tổng kiếm được: 0₫"
+                    android:textSize="14sp"
+                    android:textColor="#555"
+                    android:layout_marginBottom="4dp" />
+
+                <!-- Tổng đã rút -->
+                <TextView
+                    android:id="@+id/txtTotalWithdrawn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tổng đã rút: 0₫"
+                    android:textSize="14sp"
+                    android:textColor="#555" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 🗒 Lịch sử giao dịch -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lịch sử giao dịch"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#222"
+            android:layout_marginBottom="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTransactions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:clipToPadding="false"
+            android:paddingBottom="16dp" />
+
         <!-- 🚪 Nút đăng xuất -->
         <Button
             android:id="@+id/btnLogout"
@@ -126,5 +205,6 @@
             android:layout_marginBottom="24dp"
             android:backgroundTint="#E53935"
             android:paddingVertical="12dp" />
+
     </LinearLayout>
 </ScrollView>

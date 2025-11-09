@@ -28,7 +28,7 @@ public class NotificationAdapter extends ArrayAdapter<NotificationItem> {
         tvDate.setText(item.createdAt.replace("T", " ").substring(0, 16));
 
         if (!item.isRead) {
-            convertView.setBackgroundColor(0xFFE3F2FD); // màu xanh nhạt nếu chưa đọc
+            convertView.setBackgroundColor(0xFFE3F2FD);
         } else {
             convertView.setBackgroundColor(0xFFFFFFFF);
         }
