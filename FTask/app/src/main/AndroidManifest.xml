@@ -21,14 +21,6 @@
             android:name=".ui.auth.CompleteProfileActivity"
             android:exported="false" />
 
-        <service
-            android:name=".service.MyFirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDcHWb-YPhkGk9er_TwN6A4xTV21Wi0Iq8" />
@@ -82,6 +74,15 @@
         </activity>
 
         <activity android:name=".ui.home.MapPickerActivity" />
+
+        <!-- Firebase Cloud Messaging Service -->
+        <service
+            android:name=".MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
