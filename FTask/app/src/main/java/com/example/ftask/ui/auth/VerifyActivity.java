@@ -13,7 +13,6 @@ import android.util.Log;
 import com.example.ftask.MainActivity;
 import com.example.ftask.R;
 import com.example.ftask.ui.auth.CompleteProfileActivity;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 public class VerifyActivity extends AppCompatActivity {
 
@@ -88,18 +87,6 @@ public class VerifyActivity extends AppCompatActivity {
                             SharedPreferences.Editor editor = getSharedPreferences("MyPrefs", MODE_PRIVATE).edit();
                             editor.putString("accessToken", token);
                             editor.apply();
-
-                            // Lấy FCM token
-                            FirebaseMessaging.getInstance().getToken()
-                                    .addOnCompleteListener(task -> {
-                                        if (task.isSuccessful()) {
-                                            String fcmToken = task.getResult();
-                                            Log.i(TAG, "Device FCM token: " + fcmToken);
-                                            // TODO: Gửi fcmToken lên server kèm accessToken nếu cần
-                                        } else {
-                                            Log.w(TAG, "Failed to get FCM token", task.getException());
-                                        }
-                                    });
 
                             // Mở Activity tiếp theo
                             Intent intent;

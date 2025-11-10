@@ -11,7 +11,6 @@ import java.io.IOException;
 
 import com.example.ftask.MainActivity;
 import com.example.ftask.R;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 public class CompleteProfileActivity extends AppCompatActivity {
 
@@ -48,18 +47,10 @@ public class CompleteProfileActivity extends AppCompatActivity {
         RadioButton rb = findViewById(selectedId);
         String gender = rb.getText().toString().toUpperCase(); // MALE hoặc FEMALE
 
-        // Lấy FCM token
-        FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(task -> {
-                    String fcmToken = "";
-                    if (task.isSuccessful()) {
-                        fcmToken = task.getResult();
-                    }
-                    sendProfileToServer(fullName, gender, fcmToken);
-                });
+        sendProfileToServer(fullName, gender);
     }
 
-    private void sendProfileToServer(String fullName, String gender, String fcmToken) {
+    private void sendProfileToServer(String fullName, String gender) {
         String token = getToken();
         if (token.isEmpty()) {
             Toast.makeText(this, "Token rỗng, chưa đăng nhập", Toast.LENGTH_SHORT).show();
@@ -70,7 +61,7 @@ public class CompleteProfileActivity extends AppCompatActivity {
         try {
             json.put("fullName", fullName);
             json.put("gender", gender);
-            json.put("fcmToken", fcmToken != null ? fcmToken : "");
+            json.put("fcmToken", "");
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Lỗi tạo dữ liệu", Toast.LENGTH_SHORT).show();
