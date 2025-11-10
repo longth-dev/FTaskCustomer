@@ -2,6 +2,7 @@ package com.example.ftask.ui.auth;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.*;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +12,7 @@ import java.io.IOException;
 
 import com.example.ftask.MainActivity;
 import com.example.ftask.R;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class CompleteProfileActivity extends AppCompatActivity {
 
@@ -47,10 +49,25 @@ public class CompleteProfileActivity extends AppCompatActivity {
         RadioButton rb = findViewById(selectedId);
         String gender = rb.getText().toString().toUpperCase(); // MALE hoặc FEMALE
 
-        sendProfileToServer(fullName, gender);
+        // Lấy FCM token trước khi gửi
+        fetchFcmTokenAndSend(fullName, gender);
     }
 
-    private void sendProfileToServer(String fullName, String gender) {
+    private void fetchFcmTokenAndSend(String fullName, String gender) {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    String fcmToken = "";
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        fcmToken = task.getResult();
+                        Log.d("CompleteProfile", "FCM Token: " + fcmToken);
+                    } else {
+                        Log.w("CompleteProfile", "Không lấy được FCM token");
+                    }
+                    sendProfileToServer(fullName, gender, fcmToken);
+                });
+    }
+
+    private void sendProfileToServer(String fullName, String gender, String fcmToken) {
         String token = getToken();
         if (token.isEmpty()) {
             Toast.makeText(this, "Token rỗng, chưa đăng nhập", Toast.LENGTH_SHORT).show();
@@ -61,7 +78,9 @@ public class CompleteProfileActivity extends AppCompatActivity {
         try {
             json.put("fullName", fullName);
             json.put("gender", gender);
-            json.put("fcmToken", "");
+            json.put("fcmToken", fcmToken);
+            Log.d("CompleteProfile", "JSON gửi lên server: " + json.toString());
+            Log.d("CompleteProfile", "Token: " + token);
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Lỗi tạo dữ liệu", Toast.LENGTH_SHORT).show();
@@ -71,7 +90,7 @@ public class CompleteProfileActivity extends AppCompatActivity {
         RequestBody body = RequestBody.create(json.toString(), MediaType.get("application/json; charset=utf-8"));
         Request request = new Request.Builder()
                 .url("https://ftask.anhtudev.works/users/update-info")
-                .put(body) // PUT để tránh lỗi 405
+                .put(body)
                 .addHeader("Authorization", "Bearer " + token)
                 .build();
 
@@ -81,11 +100,15 @@ public class CompleteProfileActivity extends AppCompatActivity {
                 runOnUiThread(() ->
                         Toast.makeText(CompleteProfileActivity.this, "Lỗi mạng: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                 );
+                Log.d("CompleteProfile", "Request thất bại: " + e.getMessage());
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String res = response.body() != null ? response.body().string() : "";
+                Log.d("CompleteProfile", "Response code: " + response.code());
+                Log.d("CompleteProfile", "Response body: " + res);
+
                 runOnUiThread(() -> {
                     if (response.isSuccessful()) {
                         Toast.makeText(CompleteProfileActivity.this, "Cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();

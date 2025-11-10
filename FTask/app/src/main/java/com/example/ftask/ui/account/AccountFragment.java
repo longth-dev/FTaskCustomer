@@ -10,12 +10,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AlertDialog;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,19 +43,29 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class AccountFragment extends Fragment {
 
+    // View thông tin người dùng
     private TextView txtFullName, txtEmail, txtPhone, txtRole;
+
+    // View thông tin ví
     private TextView txtBalance, txtTotalEarned, txtTotalWithdrawn;
-    private ImageView imgAvatar;
-    private Button btnLogout, btnTopUp, btnWithdraw;
+    private Button btnTopUp, btnWithdraw;
+    private LinearLayout layoutHistory;
+    private CardView cardWallet;
+
+    // RecyclerView giao dịch
     private RecyclerView rvTransactions;
     private TransactionAdapter transactionAdapter;
-    private List<Transaction> transactionList = new ArrayList<>();
+    private final List<Transaction> transactionList = new ArrayList<>();
+
+    private Button btnLogout;
+    private ImageView imgAvatar;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.fragment_account, container, false);
 
         // Ánh xạ view thông tin người dùng
@@ -63,24 +75,35 @@ public class AccountFragment extends Fragment {
         txtPhone = view.findViewById(R.id.txtPhone);
         txtRole = view.findViewById(R.id.txtRole);
 
-        // Ánh xạ view thông tin ví
+        // Ánh xạ view ví
         txtBalance = view.findViewById(R.id.txtBalance);
         txtTotalEarned = view.findViewById(R.id.txtTotalEarned);
         txtTotalWithdrawn = view.findViewById(R.id.txtTotalWithdrawn);
+        btnTopUp = view.findViewById(R.id.btnTopUp);
+        btnWithdraw = view.findViewById(R.id.btnWithdraw);
+        layoutHistory = view.findViewById(R.id.layoutHistory);
+        cardWallet = view.findViewById(R.id.cardWallet);
 
-        // Ánh xạ RecyclerView lịch sử giao dịch
+        // RecyclerView lịch sử
         rvTransactions = view.findViewById(R.id.rvTransactions);
         rvTransactions.setLayoutManager(new LinearLayoutManager(requireContext()));
         transactionAdapter = new TransactionAdapter(transactionList);
         rvTransactions.setAdapter(transactionAdapter);
 
         // Nút nạp tiền
-        btnTopUp = view.findViewById(R.id.btnTopUp);
         btnTopUp.setOnClickListener(v -> showTopUpDialog());
 
         // Nút rút tiền
-        btnWithdraw = view.findViewById(R.id.btnWithdraw);
         btnWithdraw.setOnClickListener(v -> showWithdrawDialog());
+
+        // Toggle ẩn/hiện lịch sử giao dịch
+        cardWallet.setOnClickListener(v -> {
+            if (layoutHistory.getVisibility() == View.GONE) {
+                layoutHistory.setVisibility(View.VISIBLE);
+            } else {
+                layoutHistory.setVisibility(View.GONE);
+            }
+        });
 
         // Nút đăng xuất
         btnLogout = view.findViewById(R.id.btnLogout);
@@ -165,58 +188,27 @@ public class AccountFragment extends Fragment {
         String callbackUrl = "ftask://payment/callback";
         String url = "https://ftask.anhtudev.works/wallets/top-up?amount=" + amount + "&callbackUrl=" + Uri.encode(callbackUrl);
 
-        android.util.Log.d("TopUp", "URL: " + url);
-
         RequestQueue queue = Volley.newRequestQueue(requireContext());
-
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, null,
                 response -> {
-                    android.util.Log.d("TopUp", "Response: " + response.toString());
                     try {
                         JSONObject result = response.getJSONObject("result");
                         String paymentUrl = result.getString("paymentUrl");
-
-                        android.util.Log.d("TopUp", "Payment URL: " + paymentUrl);
 
                         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(paymentUrl));
                         startActivity(browserIntent);
 
                         Toast.makeText(requireContext(), "Đang chuyển đến cổng thanh toán...", Toast.LENGTH_SHORT).show();
-
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        android.util.Log.e("TopUp", "JSON Error: " + e.getMessage());
-                        Toast.makeText(requireContext(), "Lỗi khi khởi tạo thanh toán: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Lỗi khi khởi tạo thanh toán", Toast.LENGTH_SHORT).show();
                     }
                 },
-                error -> {
-                    error.printStackTrace();
-                    String errorMsg = "Lỗi không xác định";
-                    if (error.networkResponse != null) {
-                        errorMsg = "HTTP " + error.networkResponse.statusCode;
-                        try {
-                            String responseBody = new String(error.networkResponse.data, "utf-8");
-                            android.util.Log.e("TopUp", "Error Response: " + responseBody);
-                            errorMsg += ": " + responseBody;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else if (error.getMessage() != null) {
-                        errorMsg = error.getMessage();
-                    }
-                    android.util.Log.e("TopUp", "Error: " + errorMsg);
-                    Toast.makeText(requireContext(), "Lỗi kết nối: " + errorMsg, Toast.LENGTH_LONG).show();
-                }) {
+                error -> handleVolleyError("TopUp", error)) {
+
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
-                String token = prefs.getString("accessToken", null);
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Content-Type", "application/json");
-                if (token != null) {
-                    headers.put("Authorization", "Bearer " + token);
-                }
-                return headers;
+                return getAuthHeaders();
             }
         };
         queue.add(request);
@@ -225,71 +217,51 @@ public class AccountFragment extends Fragment {
     // Gọi API rút tiền
     private void initiateWithdrawal(int amount) {
         String url = "https://ftask.anhtudev.works/wallets/withdrawal?amount=" + amount;
-
-        android.util.Log.d("Withdrawal", "URL: " + url);
-
         RequestQueue queue = Volley.newRequestQueue(requireContext());
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, null,
                 response -> {
-                    android.util.Log.d("Withdrawal", "Response: " + response.toString());
-                    try {
-                        String message = response.optString("message", "Yêu cầu rút tiền thành công!");
-                        Toast.makeText(requireContext(), "✅ " + message, Toast.LENGTH_LONG).show();
-
-                        // Refresh lại thông tin ví và lịch sử giao dịch
-                        fetchWalletInfo();
-                        fetchTransactions();
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        android.util.Log.e("Withdrawal", "Error: " + e.getMessage());
-                        Toast.makeText(requireContext(), "Lỗi xử lý phản hồi", Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(requireContext(), "✅ Yêu cầu rút tiền thành công!", Toast.LENGTH_LONG).show();
+                    fetchWalletInfo();
+                    fetchTransactions();
                 },
-                error -> {
-                    error.printStackTrace();
-                    String errorMsg = "Lỗi không xác định";
-                    if (error.networkResponse != null) {
-                        errorMsg = "HTTP " + error.networkResponse.statusCode;
-                        try {
-                            String responseBody = new String(error.networkResponse.data, "utf-8");
-                            android.util.Log.e("Withdrawal", "Error Response: " + responseBody);
+                error -> handleVolleyError("Withdrawal", error)) {
 
-                            // Parse error message từ server
-                            try {
-                                JSONObject errorJson = new JSONObject(responseBody);
-                                String serverMsg = errorJson.optString("message", "");
-                                if (!serverMsg.isEmpty()) {
-                                    errorMsg = serverMsg;
-                                }
-                            } catch (JSONException ignored) {}
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } else if (error.getMessage() != null) {
-                        errorMsg = error.getMessage();
-                    }
-                    android.util.Log.e("Withdrawal", "Error: " + errorMsg);
-                    Toast.makeText(requireContext(), "❌ " + errorMsg, Toast.LENGTH_LONG).show();
-                }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
-                String token = prefs.getString("accessToken", null);
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Content-Type", "application/json");
-                if (token != null) {
-                    headers.put("Authorization", "Bearer " + token);
-                }
-                return headers;
+                return getAuthHeaders();
             }
         };
         queue.add(request);
     }
 
-    // Các phương thức khác giữ nguyên...
+    // Xử lý lỗi chung
+    private void handleVolleyError(String tag, com.android.volley.VolleyError error) {
+        String errorMsg = "Lỗi không xác định";
+        if (error.networkResponse != null) {
+            errorMsg = "HTTP " + error.networkResponse.statusCode;
+            try {
+                String responseBody = new String(error.networkResponse.data, "utf-8");
+                JSONObject errorJson = new JSONObject(responseBody);
+                String serverMsg = errorJson.optString("message", "");
+                if (!serverMsg.isEmpty()) errorMsg = serverMsg;
+            } catch (Exception ignored) {}
+        } else if (error.getMessage() != null) {
+            errorMsg = error.getMessage();
+        }
+        Toast.makeText(requireContext(), "❌ " + errorMsg, Toast.LENGTH_LONG).show();
+    }
+
+    private Map<String, String> getAuthHeaders() {
+        SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        String token = prefs.getString("accessToken", null);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        if (token != null) headers.put("Authorization", "Bearer " + token);
+        return headers;
+    }
+
+    // ======= API LẤY DỮ LIỆU =======
 
     private void fetchUserInfo() {
         String url = "https://ftask.anhtudev.works/users/me";
@@ -308,18 +280,11 @@ public class AccountFragment extends Fragment {
                         Toast.makeText(requireContext(), "Lỗi xử lý dữ liệu người dùng", Toast.LENGTH_SHORT).show();
                     }
                 },
-                error -> {
-                    error.printStackTrace();
-                    Toast.makeText(requireContext(), "Không thể tải thông tin tài khoản", Toast.LENGTH_LONG).show();
-                }) {
+                error -> Toast.makeText(requireContext(), "Không thể tải thông tin tài khoản", Toast.LENGTH_LONG).show()) {
+
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
-                String token = prefs.getString("accessToken", null);
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Content-Type", "application/json");
-                if (token != null) headers.put("Authorization", "Bearer " + token);
-                return headers;
+                return getAuthHeaders();
             }
         };
         queue.add(request);
@@ -345,18 +310,11 @@ public class AccountFragment extends Fragment {
                         Toast.makeText(requireContext(), "Lỗi xử lý dữ liệu ví", Toast.LENGTH_SHORT).show();
                     }
                 },
-                error -> {
-                    error.printStackTrace();
-                    Toast.makeText(requireContext(), "Không thể tải thông tin ví", Toast.LENGTH_LONG).show();
-                }) {
+                error -> Toast.makeText(requireContext(), "Không thể tải thông tin ví", Toast.LENGTH_LONG).show()) {
+
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
-                String token = prefs.getString("accessToken", null);
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Content-Type", "application/json");
-                if (token != null) headers.put("Authorization", "Bearer " + token);
-                return headers;
+                return getAuthHeaders();
             }
         };
         queue.add(request);
@@ -391,18 +349,11 @@ public class AccountFragment extends Fragment {
                         Toast.makeText(requireContext(), "Lỗi tải lịch sử giao dịch", Toast.LENGTH_SHORT).show();
                     }
                 },
-                error -> {
-                    error.printStackTrace();
-                    Toast.makeText(requireContext(), "Không thể tải lịch sử giao dịch", Toast.LENGTH_LONG).show();
-                }) {
+                error -> Toast.makeText(requireContext(), "Không thể tải lịch sử giao dịch", Toast.LENGTH_LONG).show()) {
+
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                SharedPreferences prefs = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
-                String token = prefs.getString("accessToken", null);
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Content-Type", "application/json");
-                if (token != null) headers.put("Authorization", "Bearer " + token);
-                return headers;
+                return getAuthHeaders();
             }
         };
         queue.add(request);

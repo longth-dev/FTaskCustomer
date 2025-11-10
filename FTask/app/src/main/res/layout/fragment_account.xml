@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -116,6 +117,7 @@
 
         <!-- 🪙 Card thông tin ví -->
         <androidx.cardview.widget.CardView
+            android:id="@+id/cardWallet"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             card_view:cardCornerRadius="16dp"
@@ -131,6 +133,7 @@
 
                 <!-- Số dư -->
                 <LinearLayout
+                    android:id="@+id/layoutWalletHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -171,6 +174,7 @@
                     android:textSize="14sp"
                     android:textColor="#555" />
 
+                <!-- Nút nạp rút -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -178,7 +182,6 @@
                     android:layout_marginTop="12dp"
                     android:weightSum="2">
 
-                    <!-- Nút nạp tiền -->
                     <Button
                         android:id="@+id/btnTopUp"
                         android:layout_width="0dp"
@@ -192,7 +195,6 @@
                         android:paddingVertical="10dp"
                         android:layout_marginEnd="6dp" />
 
-                    <!-- Nút rút tiền -->
                     <Button
                         android:id="@+id/btnWithdraw"
                         android:layout_width="0dp"
@@ -206,26 +208,36 @@
                         android:paddingVertical="10dp"
                         android:layout_marginStart="6dp" />
                 </LinearLayout>
+
+                <!-- 🔽 Lịch sử giao dịch (ẩn mặc định) -->
+                <LinearLayout
+                    android:id="@+id/layoutHistory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:layout_marginTop="12dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Lịch sử giao dịch"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#222"
+                        android:layout_marginBottom="8dp" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvTransactions"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="true"
+                        android:clipToPadding="false"
+                        android:paddingBottom="16dp" />
+                </LinearLayout>
+
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-
-        <!-- 🗒 Lịch sử giao dịch -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Lịch sử giao dịch"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#222"
-            android:layout_marginBottom="8dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvTransactions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
-            android:clipToPadding="false"
-            android:paddingBottom="16dp" />
 
         <!-- 🚪 Nút đăng xuất -->
         <Button
@@ -242,4 +254,4 @@
             android:paddingVertical="12dp" />
 
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>
