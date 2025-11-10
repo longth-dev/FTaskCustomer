@@ -1,13 +1,19 @@
 package com.example.ftask;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
@@ -16,9 +22,13 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.ftask.api.FcmTokenHelper;
 import com.example.ftask.databinding.ActivityMainBinding;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONObject;
 
@@ -30,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private ActivityMainBinding binding;
     private NavController navController;
+    private ActivityResultLauncher<String> requestPermissionLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +58,11 @@ public class MainActivity extends AppCompatActivity {
         loadUnreadCount(binding.navView);
 
         handleIntent(getIntent());
+
+        // Setup FCM
+        setupPermissionLauncher();
+        requestNotificationPermission();
+        getFCMToken();
     }
 
     @Override
@@ -180,5 +196,73 @@ public class MainActivity extends AppCompatActivity {
         };
 
         queue.add(request);
+    }
+
+    private void setupPermissionLauncher() {
+        requestPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        Log.d(TAG, "Notification permission granted");
+                        getFCMToken();
+                    } else {
+                        Log.w(TAG, "Notification permission denied");
+                    }
+                });
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Requesting notification permission");
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            } else {
+                Log.d(TAG, "Notification permission already granted");
+            }
+        }
+    }
+
+    private void getFCMToken() {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+
+                        // Lấy token thành công
+                        String fcmToken = task.getResult();
+                        
+                        // Log token ra console (Logcat)
+                        Log.d(TAG, "FCM Token: " + fcmToken);
+                        Log.i(TAG, "============================================");
+                        Log.i(TAG, "FCM TOKEN (copy token này để test từ BE):");
+                        Log.i(TAG, fcmToken);
+                        Log.i(TAG, "============================================");
+
+                        // Gửi token lên server thông qua FcmTokenHelper
+                        // Chỉ gửi nếu đã có accessToken (đã đăng nhập)
+                        String accessToken = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+                                .getString("accessToken", null);
+                        if (accessToken != null && !accessToken.isEmpty()) {
+                            FcmTokenHelper.sendToken(MainActivity.this, fcmToken, new FcmTokenHelper.TokenCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    Log.i(TAG, "FCM token sent to server successfully");
+                                }
+
+                                @Override
+                                public void onFailure(String error) {
+                                    Log.e(TAG, "Failed to send FCM token to server: " + error);
+                                }
+                            });
+                        } else {
+                            Log.d(TAG, "Access token not available, FCM token will be sent after login");
+                        }
+                    }
+                });
     }
 }

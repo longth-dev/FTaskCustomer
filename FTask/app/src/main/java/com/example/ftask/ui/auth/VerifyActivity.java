@@ -12,7 +12,11 @@ import android.util.Log;
 
 import com.example.ftask.MainActivity;
 import com.example.ftask.R;
+import com.example.ftask.api.FcmTokenHelper;
 import com.example.ftask.ui.auth.CompleteProfileActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class VerifyActivity extends AppCompatActivity {
 
@@ -88,6 +92,9 @@ public class VerifyActivity extends AppCompatActivity {
                             editor.putString("accessToken", token);
                             editor.apply();
 
+                            // Lấy FCM token và gửi lên server sau khi login thành công
+                            registerFCMToken();
+
                             // Mở Activity tiếp theo
                             Intent intent;
                             if (newUser) {
@@ -109,5 +116,35 @@ public class VerifyActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void registerFCMToken() {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+
+                        // Lấy token thành công
+                        String fcmToken = task.getResult();
+                        Log.d(TAG, "FCM Token retrieved: " + fcmToken);
+
+                        // Gửi token lên server thông qua FcmTokenHelper
+                        FcmTokenHelper.sendToken(VerifyActivity.this, fcmToken, new FcmTokenHelper.TokenCallback() {
+                            @Override
+                            public void onSuccess() {
+                                Log.i(TAG, "FCM token sent to server successfully after login");
+                            }
+
+                            @Override
+                            public void onFailure(String error) {
+                                Log.e(TAG, "Failed to send FCM token to server after login: " + error);
+                            }
+                        });
+                    }
+                });
     }
 }
