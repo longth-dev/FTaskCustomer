@@ -62,6 +62,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
         Booking b = bookings.get(position);
         holder.txtId.setText("Mã đơn: #" + b.getId());
 
+        holder.txtServiceName.setText("Dịch vụ: " + b.getServiceName());
         // Tách ngày và giờ
         String[] dateTime = formatDateTime(b.getStartAt());
         holder.txtDate.setText(dateTime[0]); // Ngày
@@ -568,17 +569,20 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
 
     static class BookingViewHolder extends RecyclerView.ViewHolder {
         TextView txtId, txtDate, txtTime, txtPrice, txtStatus, txtNote;
+        TextView txtServiceName; // ✅ Thêm
         Button btnPayment, btnCancel, btnInsufficientAgree, btnInsufficientReject;
 
         public BookingViewHolder(@NonNull View itemView) {
             super(itemView);
             txtId = itemView.findViewById(R.id.txtBookingId);
+            txtServiceName = itemView.findViewById(R.id.txtServiceName); // ✅ Thêm
             txtDate = itemView.findViewById(R.id.txtBookingDate);
             txtTime = itemView.findViewById(R.id.txtBookingTime);
             txtPrice = itemView.findViewById(R.id.txtBookingPrice);
             txtStatus = itemView.findViewById(R.id.txtBookingStatus);
             txtNote = itemView.findViewById(R.id.txtBookingNote);
             btnPayment = itemView.findViewById(R.id.btnPayment);
+            btnCancel = itemView.findViewById(R.id.btnCancelBooking);
             btnCancel = itemView.findViewById(R.id.btnCancelBooking);
             btnInsufficientAgree = itemView.findViewById(R.id.btnInsufficientAgree);
             btnInsufficientReject = itemView.findViewById(R.id.btnInsufficientReject);

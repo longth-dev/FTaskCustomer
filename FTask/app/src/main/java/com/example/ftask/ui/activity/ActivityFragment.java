@@ -151,7 +151,14 @@ public class ActivityFragment extends Fragment {
                         String note = b.optString("customerNote", "");
                         String status = b.getString("status");
 
-                        bookingList.add(new Booking(id, startAt, totalPrice, note, status));
+                        // ✅ Parse tên dịch vụ từ variant
+                        String serviceName = "Không có dịch vụ";
+                        if (b.has("variant") && !b.isNull("variant")) {
+                            JSONObject variant = b.getJSONObject("variant");
+                            serviceName = variant.optString("name", "Không có dịch vụ");
+                        }
+
+                        bookingList.add(new Booking(id, startAt, totalPrice, note, status, serviceName));
                     }
 
                     if (getActivity() != null)

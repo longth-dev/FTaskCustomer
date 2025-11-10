@@ -6,13 +6,15 @@ public class Booking {
     private double totalPrice;
     private String customerNote;
     private String status;
+    private String serviceName; // ✅ Thêm tên dịch vụ
 
-    public Booking(int id, String startAt, double totalPrice, String customerNote, String status) {
+    public Booking(int id, String startAt, double totalPrice, String customerNote, String status, String serviceName) {
         this.id = id;
         this.startAt = startAt;
         this.totalPrice = totalPrice;
         this.customerNote = customerNote;
         this.status = status;
+        this.serviceName = serviceName;
     }
 
     public int getId() {
@@ -33,5 +35,9 @@ public class Booking {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getServiceName() {
+        return serviceName;
     }
 }
