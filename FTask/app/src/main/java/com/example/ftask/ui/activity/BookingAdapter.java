@@ -209,7 +209,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
     private String[] formatDateTime(String startAt) {
         try {
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-            inputFormat.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+            inputFormat.setTimeZone(TimeZone.getTimeZone("UTC")); // ✅ Đổi thành UTC
 
             Date date = inputFormat.parse(startAt);
 
@@ -217,12 +217,12 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
                 SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
+                // Output format sẽ tự dùng timezone của thiết bị (VN)
                 return new String[]{dateFormat.format(date), timeFormat.format(date)};
             }
         } catch (ParseException e) {
             Log.e(TAG, "Error parsing date: " + startAt, e);
         }
-
         return new String[]{"--/--/----", "--:--"};
     }
 
@@ -265,7 +265,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
     private long getHoursUntilStart(String startAt) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-            sdf.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC")); // ✅ Đổi thành UTC
 
             Date startDate = sdf.parse(startAt);
             Date currentDate = new Date();
