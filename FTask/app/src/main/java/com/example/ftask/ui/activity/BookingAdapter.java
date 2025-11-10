@@ -86,7 +86,11 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
         // ===== XỬ LÝ TRẠNG THÁI WAITING_FOR_PAYMENT =====
         if (status.equals("WAITING_FOR_PAYMENT")) {
             holder.btnPayment.setVisibility(View.VISIBLE);
+            holder.btnCancel.setVisibility(View.VISIBLE); // ✅ Thêm nút hủy
+
             holder.btnPayment.setOnClickListener(v -> processPayment(b.getId()));
+            holder.btnCancel.setOnClickListener(v -> showCancelDialog(b.getId())); // ✅ Xử lý hủy đơn
+
             return; // Dừng lại, không xử lý các trường hợp khác
         }
 
@@ -101,9 +105,10 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
         Log.d(TAG, "Booking #" + b.getId() + " - Status: " + status + " - Hours remaining: " + hoursRemaining);
 
         if (hoursRemaining >= 0 && hoursRemaining <= 6) {
-            // Trước 6 tiếng: Hiện 2 nút Đồng ý/Từ chối thiếu người
+            // Trước 6 tiếng: Hiện 2 nút Đồng ý/Từ chối thiếu người + Nút Hủy đơn
             holder.btnInsufficientAgree.setVisibility(View.VISIBLE);
             holder.btnInsufficientReject.setVisibility(View.VISIBLE);
+            holder.btnCancel.setVisibility(View.VISIBLE);
 
             holder.btnInsufficientAgree.setOnClickListener(v ->
                     showConfirmInsufficientDialog(b.getId(), true)
@@ -112,6 +117,10 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
             holder.btnInsufficientReject.setOnClickListener(v ->
                     showConfirmInsufficientDialog(b.getId(), false)
             );
+
+            // Xử lý nút Hủy đơn
+            holder.btnCancel.setOnClickListener(v -> showCancelDialog(b.getId()));
+
         } else if (hoursRemaining > 6) {
             // Sau 6 tiếng trở lên: Chỉ hiện nút Hủy thông thường
             holder.btnCancel.setVisibility(View.VISIBLE);

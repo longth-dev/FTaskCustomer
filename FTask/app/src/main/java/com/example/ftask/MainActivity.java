@@ -22,6 +22,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.ftask.api.FcmTokenHelper;
 import com.example.ftask.databinding.ActivityMainBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -39,16 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private ActivityMainBinding binding;
     private NavController navController;
-
-    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(),
-            isGranted -> {
-                if (isGranted) {
-                    Log.d(TAG, "Notification permission granted");
-                } else {
-                    Log.d(TAG, "Notification permission denied");
-                }
-            });
+    private ActivityResultLauncher<String> requestPermissionLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,27 +59,10 @@ public class MainActivity extends AppCompatActivity {
 
         handleIntent(getIntent());
 
-        askNotificationPermission();
-
-        // Lấy và log FCM Token
-        FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        String token = task.getResult();
-                        Log.i(TAG, "FCM Token: " + token);
-                    } else {
-                        Log.w(TAG, "Fetching FCM registration token failed", task.getException());
-                    }
-                });
-    }
-
-    private void askNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
-                    PackageManager.PERMISSION_GRANTED) {
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
-            }
-        }
+        // Setup FCM
+        setupPermissionLauncher();
+        requestNotificationPermission();
+        getFCMToken();
     }
 
     @Override
@@ -116,13 +91,9 @@ public class MainActivity extends AppCompatActivity {
                 String host = data.getHost();
 
                 if ("payment".equals(host)) {
-                    // Callback nạp tiền ví - Chuyển đến AccountFragment
+                    // Chuyển đến AccountFragment và xử lý callback
                     navController.navigate(R.id.accountFragment);
                     handleVNPayCallback(data);
-                } else if ("booking-payment".equals(host)) {
-                    // Callback thanh toán booking - Chuyển đến ActivityFragment
-                    navController.navigate(R.id.activityFragment);
-                    handleBookingPaymentCallback(data);
                 }
             }
         }
@@ -134,101 +105,11 @@ public class MainActivity extends AppCompatActivity {
         String vnpTransactionStatus = data.getQueryParameter("vnp_TransactionStatus");
 
         if (vnpOrderInfo != null && vnpResponseCode != null && vnpTransactionStatus != null) {
-            confirmWalletPayment(vnpOrderInfo, vnpResponseCode, vnpTransactionStatus);
+            confirmPayment(vnpOrderInfo, vnpResponseCode, vnpTransactionStatus);
         }
     }
 
-    private void handleBookingPaymentCallback(Uri data) {
-        String vnpOrderInfo = data.getQueryParameter("vnp_OrderInfo");
-        String vnpResponseCode = data.getQueryParameter("vnp_ResponseCode");
-        String vnpTransactionStatus = data.getQueryParameter("vnp_TransactionStatus");
-
-        Log.d(TAG, "========================================");
-        Log.d(TAG, "Booking Payment Callback");
-        Log.d(TAG, "Order Info: " + vnpOrderInfo);
-        Log.d(TAG, "Response Code: " + vnpResponseCode);
-        Log.d(TAG, "Transaction Status: " + vnpTransactionStatus);
-        Log.d(TAG, "========================================");
-
-        // Gọi API confirm để xác nhận thanh toán
-        if (vnpOrderInfo != null && vnpResponseCode != null && vnpTransactionStatus != null) {
-            confirmBookingPayment(vnpOrderInfo, vnpResponseCode, vnpTransactionStatus);
-        } else {
-            Toast.makeText(this, "Thiếu thông tin callback từ VNPay!", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    /**
-     * Gọi API confirm cho thanh toán booking
-     */
-    private void confirmBookingPayment(String orderInfo, String responseCode, String transactionStatus) {
-        String url = "https://ftask.anhtudev.works/payments/confirm?vnp_OrderInfo=" + orderInfo
-                + "&vnp_ResponseCode=" + responseCode
-                + "&vnp_TransactionStatus=" + transactionStatus;
-
-        Log.d(TAG, "========================================");
-        Log.d(TAG, "Confirm Booking Payment URL: " + url);
-        Log.d(TAG, "========================================");
-
-        String token = getSharedPreferences("MyPrefs", MODE_PRIVATE)
-                .getString("accessToken", null);
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                response -> {
-                    try {
-                        Log.d(TAG, "✓ Confirm Response: " + response.toString());
-
-                        String message = response.optString("message", "Xác nhận thanh toán thành công!");
-                        int code = response.optInt("code", 0);
-
-                        // Kiểm tra kết quả từ VNPay (00 = thành công)
-                        if ("00".equals(responseCode) && "00".equals(transactionStatus)) {
-                            Toast.makeText(this, "✅ Thanh toán booking thành công!\n" + message, Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(this, "❌ Thanh toán booking thất bại!\n" + message, Toast.LENGTH_LONG).show();
-                        }
-
-                        // Reload lại danh sách booking
-                        navController.navigate(R.id.activityFragment);
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Log.e(TAG, "Error parsing confirm response", e);
-                        Toast.makeText(this, "Lỗi xác nhận thanh toán", Toast.LENGTH_SHORT).show();
-                    }
-                },
-                error -> {
-                    Log.e(TAG, "========================================");
-                    Log.e(TAG, "✗ Confirm Error");
-
-                    if (error.networkResponse != null && error.networkResponse.data != null) {
-                        String errBody = new String(error.networkResponse.data);
-                        Log.e(TAG, "Error Body: " + errBody);
-                    }
-
-                    error.printStackTrace();
-                    Toast.makeText(this, "Không thể xác nhận thanh toán!", Toast.LENGTH_LONG).show();
-                    Log.e(TAG, "========================================");
-                }) {
-            @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Content-Type", "application/json");
-                if (token != null) {
-                    headers.put("Authorization", "Bearer " + token);
-                }
-                return headers;
-            }
-        };
-        queue.add(request);
-    }
-
-    /**
-     * Gọi API confirm cho nạp tiền ví
-     */
-    private void confirmWalletPayment(String orderInfo, String responseCode, String transactionStatus) {
+    private void confirmPayment(String orderInfo, String responseCode, String transactionStatus) {
         String url = "https://ftask.anhtudev.works/payments/confirm?vnp_OrderInfo=" + orderInfo
                 + "&vnp_ResponseCode=" + responseCode
                 + "&vnp_TransactionStatus=" + transactionStatus;
@@ -315,5 +196,73 @@ public class MainActivity extends AppCompatActivity {
         };
 
         queue.add(request);
+    }
+
+    private void setupPermissionLauncher() {
+        requestPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        Log.d(TAG, "Notification permission granted");
+                        getFCMToken();
+                    } else {
+                        Log.w(TAG, "Notification permission denied");
+                    }
+                });
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Requesting notification permission");
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
+            } else {
+                Log.d(TAG, "Notification permission already granted");
+            }
+        }
+    }
+
+    private void getFCMToken() {
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+
+                        // Lấy token thành công
+                        String fcmToken = task.getResult();
+                        
+                        // Log token ra console (Logcat)
+                        Log.d(TAG, "FCM Token: " + fcmToken);
+                        Log.i(TAG, "============================================");
+                        Log.i(TAG, "FCM TOKEN (copy token này để test từ BE):");
+                        Log.i(TAG, fcmToken);
+                        Log.i(TAG, "============================================");
+
+                        // Gửi token lên server thông qua FcmTokenHelper
+                        // Chỉ gửi nếu đã có accessToken (đã đăng nhập)
+                        String accessToken = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+                                .getString("accessToken", null);
+                        if (accessToken != null && !accessToken.isEmpty()) {
+                            FcmTokenHelper.sendToken(MainActivity.this, fcmToken, new FcmTokenHelper.TokenCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    Log.i(TAG, "FCM token sent to server successfully");
+                                }
+
+                                @Override
+                                public void onFailure(String error) {
+                                    Log.e(TAG, "Failed to send FCM token to server: " + error);
+                                }
+                            });
+                        } else {
+                            Log.d(TAG, "Access token not available, FCM token will be sent after login");
+                        }
+                    }
+                });
     }
 }

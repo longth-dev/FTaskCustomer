@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "160941359103",
-    "project_id": "ftaskfirebase",
-    "storage_bucket": "ftaskfirebase.firebasestorage.app"
+    "project_number": "700582417677",
+    "project_id": "prm-final-project",
+    "storage_bucket": "prm-final-project.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:160941359103:android:24657b506b9fd7f28b71ca",
+        "mobilesdk_app_id": "1:700582417677:android:f70fb6493aa3479a60cc44",
         "android_client_info": {
           "package_name": "com.example.ftask"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDrxdsHEqeaMTnT2R4w6vWJsEv-9wck4aQ"
+          "current_key": "AIzaSyBc8LAG6DuNMI3J6m2wm3Zkeh9YpIZt8gE"
         }
       ],
       "services": {
