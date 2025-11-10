@@ -222,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
                         // Chỉ kiểm tra responseCode từ VNPay (00 = thành công)
                         if ("00".equals(responseCode)) {
                             Toast.makeText(this, "✅ Nạp tiền thành công! " + message, Toast.LENGTH_LONG).show();
+                            navController.navigate(R.id.accountFragment);
                         } else {
                             Toast.makeText(this, "❌ Giao dịch thất bại: " + message, Toast.LENGTH_LONG).show();
                         }
