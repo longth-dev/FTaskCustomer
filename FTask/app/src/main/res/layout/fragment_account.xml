@@ -222,8 +222,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvTransactions"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
+            android:layout_height="300dp"
             android:clipToPadding="false"
             android:paddingBottom="16dp" />
 
