@@ -95,6 +95,11 @@ public class MainActivity extends AppCompatActivity {
                     navController.navigate(R.id.accountFragment);
                     handleVNPayCallback(data);
                 }
+                else if ("booking-payment".equals(host)) {
+                    // Callback thanh toán booking - Chuyển đến ActivityFragment
+                    navController.navigate(R.id.activityFragment);
+                    handleBookingPaymentCallback(data);
+                }
             }
         }
     }
@@ -105,11 +110,100 @@ public class MainActivity extends AppCompatActivity {
         String vnpTransactionStatus = data.getQueryParameter("vnp_TransactionStatus");
 
         if (vnpOrderInfo != null && vnpResponseCode != null && vnpTransactionStatus != null) {
-            confirmPayment(vnpOrderInfo, vnpResponseCode, vnpTransactionStatus);
+            confirmWalletPayment(vnpOrderInfo, vnpResponseCode, vnpTransactionStatus);
+        }
+    }
+    private void handleBookingPaymentCallback(Uri data) {
+        String vnpOrderInfo = data.getQueryParameter("vnp_OrderInfo");
+        String vnpResponseCode = data.getQueryParameter("vnp_ResponseCode");
+        String vnpTransactionStatus = data.getQueryParameter("vnp_TransactionStatus");
+
+        Log.d(TAG, "========================================");
+        Log.d(TAG, "Booking Payment Callback");
+        Log.d(TAG, "Order Info: " + vnpOrderInfo);
+        Log.d(TAG, "Response Code: " + vnpResponseCode);
+        Log.d(TAG, "Transaction Status: " + vnpTransactionStatus);
+        Log.d(TAG, "========================================");
+
+        // Gọi API confirm để xác nhận thanh toán
+        if (vnpOrderInfo != null && vnpResponseCode != null && vnpTransactionStatus != null) {
+            confirmBookingPayment(vnpOrderInfo, vnpResponseCode, vnpTransactionStatus);
+        } else {
+            Toast.makeText(this, "Thiếu thông tin callback từ VNPay!", Toast.LENGTH_LONG).show();
         }
     }
 
-    private void confirmPayment(String orderInfo, String responseCode, String transactionStatus) {
+    /**
+     * Gọi API confirm cho thanh toán booking
+     */
+    private void confirmBookingPayment(String orderInfo, String responseCode, String transactionStatus) {
+        String url = "https://ftask.anhtudev.works/payments/confirm?vnp_OrderInfo=" + orderInfo
+                + "&vnp_ResponseCode=" + responseCode
+                + "&vnp_TransactionStatus=" + transactionStatus;
+
+        Log.d(TAG, "========================================");
+        Log.d(TAG, "Confirm Booking Payment URL: " + url);
+        Log.d(TAG, "========================================");
+
+        String token = getSharedPreferences("MyPrefs", MODE_PRIVATE)
+                .getString("accessToken", null);
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        Log.d(TAG, "✓ Confirm Response: " + response.toString());
+
+                        String message = response.optString("message", "Xác nhận thanh toán thành công!");
+                        int code = response.optInt("code", 0);
+
+                        // Kiểm tra kết quả từ VNPay (00 = thành công)
+                        if ("00".equals(responseCode) && "00".equals(transactionStatus)) {
+                            Toast.makeText(this, "✅ Thanh toán booking thành công!\n" + message, Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(this, "❌ Thanh toán booking thất bại!\n" + message, Toast.LENGTH_LONG).show();
+                        }
+
+                        // Reload lại danh sách booking
+                        navController.navigate(R.id.activityFragment);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Log.e(TAG, "Error parsing confirm response", e);
+                        Toast.makeText(this, "Lỗi xác nhận thanh toán", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Log.e(TAG, "========================================");
+                    Log.e(TAG, "✗ Confirm Error");
+
+                    if (error.networkResponse != null && error.networkResponse.data != null) {
+                        String errBody = new String(error.networkResponse.data);
+                        Log.e(TAG, "Error Body: " + errBody);
+                    }
+
+                    error.printStackTrace();
+                    Toast.makeText(this, "Không thể xác nhận thanh toán!", Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "========================================");
+                }) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                if (token != null) {
+                    headers.put("Authorization", "Bearer " + token);
+                }
+                return headers;
+            }
+        };
+        queue.add(request);
+    }
+
+    /**
+     * Gọi API confirm cho nạp tiền ví
+     */
+    private void confirmWalletPayment(String orderInfo, String responseCode, String transactionStatus) {
         String url = "https://ftask.anhtudev.works/payments/confirm?vnp_OrderInfo=" + orderInfo
                 + "&vnp_ResponseCode=" + responseCode
                 + "&vnp_TransactionStatus=" + transactionStatus;
