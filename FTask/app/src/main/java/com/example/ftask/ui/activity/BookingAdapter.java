@@ -2,6 +2,8 @@ package com.example.ftask.ui.activity;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.graphics.Bitmap;
 import android.view.Gravity;
@@ -75,11 +77,21 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
         holder.txtNote.setText("Ghi chú: " + (b.getCustomerNote() != null && !b.getCustomerNote().isEmpty()
                 ? b.getCustomerNote() : "Không có"));
 
-        // Nếu đã CANCELLED hoặc COMPLETED thì ẩn tất cả nút
+        // Ẩn tất cả nút trước
+        holder.btnPayment.setVisibility(View.GONE);
+        holder.btnCancel.setVisibility(View.GONE);
+        holder.btnInsufficientAgree.setVisibility(View.GONE);
+        holder.btnInsufficientReject.setVisibility(View.GONE);
+
+        // ===== XỬ LÝ TRẠNG THÁI WAITING_FOR_PAYMENT =====
+        if (status.equals("WAITING_FOR_PAYMENT")) {
+            holder.btnPayment.setVisibility(View.VISIBLE);
+            holder.btnPayment.setOnClickListener(v -> processPayment(b.getId()));
+            return; // Dừng lại, không xử lý các trường hợp khác
+        }
+
+        // Nếu đã CANCELLED hoặc COMPLETED hoặc FULLY_ACCEPTED thì ẩn tất cả nút
         if (status.equals("CANCELLED") || status.equals("COMPLETED") || status.equals("FULLY_ACCEPTED")) {
-            holder.btnCancel.setVisibility(View.GONE);
-            holder.btnInsufficientAgree.setVisibility(View.GONE);
-            holder.btnInsufficientReject.setVisibility(View.GONE);
             return;
         }
 
@@ -90,7 +102,6 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
 
         if (hoursRemaining >= 0 && hoursRemaining <= 6) {
             // Trước 6 tiếng: Hiện 2 nút Đồng ý/Từ chối thiếu người
-            holder.btnCancel.setVisibility(View.GONE);
             holder.btnInsufficientAgree.setVisibility(View.VISIBLE);
             holder.btnInsufficientReject.setVisibility(View.VISIBLE);
 
@@ -104,15 +115,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
         } else if (hoursRemaining > 6) {
             // Sau 6 tiếng trở lên: Chỉ hiện nút Hủy thông thường
             holder.btnCancel.setVisibility(View.VISIBLE);
-            holder.btnInsufficientAgree.setVisibility(View.GONE);
-            holder.btnInsufficientReject.setVisibility(View.GONE);
-
             holder.btnCancel.setOnClickListener(v -> showCancelDialog(b.getId()));
-        } else {
-            // Đã qua giờ làm: Ẩn tất cả nút
-            holder.btnCancel.setVisibility(View.GONE);
-            holder.btnInsufficientAgree.setVisibility(View.GONE);
-            holder.btnInsufficientReject.setVisibility(View.GONE);
         }
 
         // 👇 Thêm click listener để hiển thị mã QR
@@ -123,6 +126,80 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
     public int getItemCount() {
         return bookings.size();
     }
+
+    // =====================================
+    // 🔹 HÀM XỬ LÝ THANH TOÁN
+    // =====================================
+    private void processPayment(int bookingId) {
+        // API này dùng POST nhưng với query parameters, không phải JSON body
+        String callbackUrl = "ftask://booking-payment/callback";
+        String url = "https://ftask.anhtudev.works/payments/pay-for-booking?bookingId="
+                + bookingId + "&callbackUrl=" + Uri.encode(callbackUrl);
+
+        Log.d(TAG, "========================================");
+        Log.d(TAG, "POST Payment URL: " + url);
+        Log.d(TAG, "========================================");
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+
+        // Sử dụng StringRequest thay vì JsonObjectRequest vì không có body
+        StringRequest request = new StringRequest(Request.Method.POST, url,
+                response -> {
+                    try {
+                        Log.d(TAG, "✓ Payment Response: " + response);
+
+                        JSONObject jsonResponse = new JSONObject(response);
+                        JSONObject result = jsonResponse.getJSONObject("result");
+                        String paymentUrl = result.getString("paymentUrl");
+
+                        // Mở trình duyệt với URL thanh toán VNPay
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(paymentUrl));
+                        context.startActivity(browserIntent);
+
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Error parsing payment response", e);
+                        Toast.makeText(context, "Lỗi đọc dữ liệu thanh toán", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Log.e(TAG, "========================================");
+                    Log.e(TAG, "✗ Payment ERROR");
+
+                    if (error.networkResponse != null) {
+                        int statusCode = error.networkResponse.statusCode;
+                        Log.e(TAG, "Status Code: " + statusCode);
+
+                        if (error.networkResponse.data != null) {
+                            String errBody = new String(error.networkResponse.data);
+                            Log.e(TAG, "Error Body: " + errBody);
+                            Toast.makeText(context, "Lỗi thanh toán: " + errBody, Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Log.e(TAG, "Network Error: " + error.getMessage());
+                        Toast.makeText(context, "Lỗi kết nối server!", Toast.LENGTH_LONG).show();
+                    }
+                    Log.e(TAG, "========================================");
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+
+                String token = context.getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+                        .getString("accessToken", null);
+
+                if (token != null && !token.isEmpty()) {
+                    headers.put("Authorization", "Bearer " + token);
+                } else {
+                    Log.e(TAG, "⚠ WARNING: No token found!");
+                }
+
+                return headers;
+            }
+        };
+
+        queue.add(request);
+    }
+
 
     /**
      * Tách ngày và giờ từ startAt
@@ -168,6 +245,9 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
                 color = 0xFF9E9E9E; // Gray
                 break;
             case "IN_PROGRESS":
+                color = 0xFFFF9800; // Orange
+                break;
+            case "WAITING_FOR_PAYMENT":
                 color = 0xFFFF9800; // Orange
                 break;
             default:
@@ -479,7 +559,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
 
     static class BookingViewHolder extends RecyclerView.ViewHolder {
         TextView txtId, txtDate, txtTime, txtPrice, txtStatus, txtNote;
-        Button btnCancel, btnInsufficientAgree, btnInsufficientReject;
+        Button btnPayment, btnCancel, btnInsufficientAgree, btnInsufficientReject;
 
         public BookingViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -489,6 +569,7 @@ public class BookingAdapter extends RecyclerView.Adapter<BookingAdapter.BookingV
             txtPrice = itemView.findViewById(R.id.txtBookingPrice);
             txtStatus = itemView.findViewById(R.id.txtBookingStatus);
             txtNote = itemView.findViewById(R.id.txtBookingNote);
+            btnPayment = itemView.findViewById(R.id.btnPayment);
             btnCancel = itemView.findViewById(R.id.btnCancelBooking);
             btnInsufficientAgree = itemView.findViewById(R.id.btnInsufficientAgree);
             btnInsufficientReject = itemView.findViewById(R.id.btnInsufficientReject);

@@ -137,6 +137,17 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="8dp">
 
+            <!-- Nút thanh toán (WAITING_FOR_PAYMENT) -->
+            <Button
+                android:id="@+id/btnPayment"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Thanh toán"
+                android:backgroundTint="#FF9800"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:visibility="gone"/>
+
             <!-- Nút hủy thông thường -->
             <Button
                 android:id="@+id/btnCancelBooking"
